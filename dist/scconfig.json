@@ -1,0 +1,18 @@
+{
+    "env": "testnet",
+    "logo": "logo",
+    "main": "@modules/general-content",
+    "assets": "@modules/assets",
+    "moduleDir": "modules",
+    "modules": {
+        "@modules/assets": {
+            "path": "assets",
+            "dependencies": []
+        },
+        "@modules/general-content": {
+            "path": "generalContent",
+            "dependencies": []
+        }
+    },
+    "dependencies": {}
+}
