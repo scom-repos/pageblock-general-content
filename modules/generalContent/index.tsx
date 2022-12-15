@@ -1,4 +1,4 @@
-import { Module, customElements, Styles, Container, customModule, application, Input, RadioGroup } from '@ijstech/components';
+import { Module, customElements, Styles, Container, customModule, application, Input, RadioGroup, Panel } from '@ijstech/components';
 import { PageBlock } from "./pageBlock.interface";
 import './generalContent.css';
 
@@ -10,41 +10,20 @@ declare global {
     }
 }
 
-const alignItems = [
-    {
-        caption: "Left",
-        value: "left",
-        checked: true,
-    },
-    {
-        caption: "Center",
-        value: "center",
-        checked: false,
-    },
-    {
-        caption: "Right",
-        value: "right",
-        checked: false,
-    },
-];
+type ContentType = 'paragraph' | 'buttons';
 
-const autoItems = [
-    {
-        caption: "Fullwidth",
-        value: "fullwidth",
-        checked: false,
+interface GeneralContentData {
+    title: {
+        titleContent: string,
+        titleFontsize: number,
+        titleFontColor: string
     },
-    {
-        caption: "Auto Width",
-        value: "auto-width",
-        checked: false,
-    },
-    {
-        caption: "Auto Height",
-        value: "auto-height",
-        checked: false,
-    },
-];
+    content: ContentData[]
+}
+
+interface ContentData {
+    type: ContentType
+}
 
 @customModule
 @customElements("i-section-general-content")
@@ -54,6 +33,9 @@ export default class GeneralContent extends Module implements PageBlock {
     private heightElm: Input;
     private alignElm: RadioGroup;
     private autoElm: RadioGroup;
+    private editPage: Panel;
+    private viewPage: Panel;
+    private content: Panel;
 
     tag: any = {};
     defaultEdit: boolean = true;
@@ -63,6 +45,26 @@ export default class GeneralContent extends Module implements PageBlock {
 
     async init() {
         super.init();
+    }
+
+    async config() {
+
+    }
+
+    async onConfigCancel() {
+
+    }
+
+    async onConfigSave() {
+
+        this.tag.width = this.widthElm.value;
+        this.tag.height = this.heightElm.value;
+        this.tag.align = this.alignElm.selectedValue;
+        this.tag.auto = this.autoElm.selectedValue;
+    }
+
+    validate(): boolean {
+        return true;
     }
 
     async getData() {
@@ -86,24 +88,68 @@ export default class GeneralContent extends Module implements PageBlock {
     }
 
     async edit() {
-
+        this.editPage.visible = true;
+        this.viewPage.visible = false;
+        this.editPage.width = "40%";
+        this.viewPage.width = "60%";
     }
 
     async confirm() {
-
+        this.editPage.visible = false;
+        this.viewPage.visible = true;
+        this.editPage.width = "0%";
+        this.viewPage.width = "100%";
     }
 
     async discard() {
+        this.editPage.visible = false;
+        this.viewPage.visible = true;
+        this.editPage.width = "0%";
+        this.viewPage.width = "100%";
+    }
+
+    private addParagraph() {
 
     }
 
-    async config() {
+    private addButtons() {
+
+    }
+
+    private setTitle() {
 
     }
 
     render() {
-        return <i-panel>
-            <i-label caption='General Content'></i-label>
+        return <i-panel width="100%">
+
+            <i-hstack width="100%">
+                <i-panel id="editPage" width="40%">
+
+                    <i-label caption="Content page setting"></i-label>
+
+                    <i-vstack id="titleSetting" width="100%" gap="10px">
+                        <i-label caption="Title"></i-label>
+                        <i-input id='titleInput' inputType="textarea" placeholder="Input the title here" width={'100%'} height={"200px"} onChanged={this.setTitle} ></i-input>
+                    </i-vstack>
+
+                    <i-vstack id="contentSetting" width="100%" gap="10px">
+                        <i-label caption="Content"></i-label>
+                        <i-panel id="content" width="100%"></i-panel>
+                        <i-hstack width="100%" justifyContent='center' gap="20px">
+                            <i-button caption="Add a paragragh" padding={{ left: '10px', top: '5px', right: '10px', bottom: '5px' }} onClick={this.addParagraph}></i-button>
+                            <i-button caption="Add buttons" padding={{ left: '10px', top: '5px', right: '10px', bottom: '5px' }} onClick={this.addButtons}></i-button>
+                        </i-hstack>
+                    </i-vstack>
+
+                </i-panel>
+
+                <i-panel id="viewPage" width="60%">
+                    <i-label caption="Content preview"></i-label>
+
+                </i-panel>
+            </i-hstack>
+
         </i-panel>
     }
 }
