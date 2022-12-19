@@ -121,7 +121,7 @@ define("@modules/general-content", ["require", "exports", "@ijstech/components",
             this.renderUI();
         }
         handleTitleAlignmentChange() {
-            this.tempData.title.titleAlignment = this.titleAlignmentPicker.value;
+            this.tempData.title.titleAlignment = this.titleAlignmentPicker.value.value;
             this.renderUI();
         }
         handleTitleFontSizeChange() {
@@ -131,17 +131,17 @@ define("@modules/general-content", ["require", "exports", "@ijstech/components",
         renderUI() {
             this.preview.clearInnerHTML();
             // render title
-            this.preview.append(this.$render("i-hstack", { width: "100%", horizontalAlignment: this.tempData.title.titleAlignment },
+            this.preview.append(this.$render("i-hstack", { id: "tempHStack", width: "100%", horizontalAlignment: this.tempData.title.titleAlignment },
                 this.$render("i-label", { font: { size: this.tempData.title.titleFontsize, color: this.tempData.title.titleFontColor }, caption: this.tempData.title.titleContent })));
             // render content
             for (let i = 0; i < this.tempData.contentList.length; i++) {
                 if (this.tempData.contentList[i].type == "paragraph") {
-                    this.preview.append(this.$render("i-hstack", { width: "100%", horizontalAlignment: this.tempData.contentList[i].content.paraAlignment },
+                    this.preview.append(this.$render("i-hstack", { id: "tempHStack", width: "100%", horizontalAlignment: this.tempData.contentList[i].content.paraAlignment },
                         this.$render("i-label", { font: { size: this.tempData.title.titleFontsize, color: this.tempData.title.titleFontColor }, caption: this.tempData.title.titleContent, wordBreak: "break-all", overflowWrap: "break-word" })));
                 }
                 else if (this.tempData.contentList[i].type == "button") {
                     let btnData = this.tempData.contentList[i].content;
-                    this.preview.append(this.$render("i-hstack", { width: "100%", horizontalAlignment: btnData.btnAlignment },
+                    this.preview.append(this.$render("i-hstack", { id: "tempHStack", width: "100%", horizontalAlignment: btnData.btnAlignment },
                         this.$render("i-button", { padding: { left: '1.5rem', right: '1.5rem', top: '1rem', bottom: '1rem' }, caption: btnData.btnTxt, font: { color: btnData.btnTxtColor, size: btnData.btnTxtFontSize }, background: { color: btnData.btnBGColor } })));
                 }
                 else {
@@ -173,7 +173,7 @@ define("@modules/general-content", ["require", "exports", "@ijstech/components",
                             this.$render("i-hstack", { width: "100%", justifyContent: 'center', gap: "20px" },
                                 this.$render("i-button", { caption: "Add a paragragh", padding: { left: '10px', top: '5px', right: '10px', bottom: '5px' }, onClick: this.addParagraph }),
                                 this.$render("i-button", { caption: "Add button", padding: { left: '10px', top: '5px', right: '10px', bottom: '5px' }, onClick: this.addButtons })))),
-                    this.$render("i-panel", { id: "viewPage", width: "60%" },
+                    this.$render("i-panel", { id: "viewPage", width: "60%", padding: { left: '2rem', top: '2rem', right: '2rem', bottom: '2rem' } },
                         this.$render("i-label", { caption: "Content preview" }),
                         this.$render("i-vstack", { id: "preview", width: "100%" }))));
         }

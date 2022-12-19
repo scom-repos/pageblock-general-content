@@ -1,4 +1,4 @@
-import { Module, customElements, Styles, Container, customModule, application, Input, RadioGroup, Panel, VStack, IComboItem } from '@ijstech/components';
+import { Module, customElements, Styles, Container, customModule, application, Input, RadioGroup, Panel, VStack, IComboItem, HStack } from '@ijstech/components';
 import { PageBlock } from "./pageBlock.interface";
 import './generalContent.css';
 
@@ -184,7 +184,7 @@ export default class GeneralContent extends Module implements PageBlock {
     }
 
     private handleTitleAlignmentChange() {
-        this.tempData.title.titleAlignment = this.titleAlignmentPicker.value;
+        this.tempData.title.titleAlignment = this.titleAlignmentPicker.value.value;
         this.renderUI();
     }
 
@@ -199,7 +199,7 @@ export default class GeneralContent extends Module implements PageBlock {
 
         // render title
         this.preview.append(
-            <i-hstack width="100%" horizontalAlignment={this.tempData.title.titleAlignment as any}>
+            <i-hstack id="tempHStack" width="100%" horizontalAlignment={this.tempData.title.titleAlignment as any}>
                 <i-label font={{ size: this.tempData.title.titleFontsize, color: this.tempData.title.titleFontColor }}
                     caption={this.tempData.title.titleContent}></i-label>
             </i-hstack>
@@ -210,17 +210,16 @@ export default class GeneralContent extends Module implements PageBlock {
 
             if (this.tempData.contentList[i].type == "paragraph") {
                 this.preview.append(
-                    <i-hstack width="100%" horizontalAlignment={(this.tempData.contentList[i].content as ParagraphData).paraAlignment as any}>
+                    <i-hstack id="tempHStack" width="100%" horizontalAlignment={(this.tempData.contentList[i].content as ParagraphData).paraAlignment as any}>
                         <i-label font={{ size: this.tempData.title.titleFontsize, color: this.tempData.title.titleFontColor }}
                             caption={this.tempData.title.titleContent} wordBreak={"break-all"} overflowWrap={"break-word"}></i-label>
                     </i-hstack>
                 )
 
-
             } else if (this.tempData.contentList[i].type == "button") {
                 let btnData = this.tempData.contentList[i].content as ButtonData
                 this.preview.append(
-                    <i-hstack width="100%" horizontalAlignment={btnData.btnAlignment as any}>
+                    <i-hstack id="tempHStack" width="100%" horizontalAlignment={btnData.btnAlignment as any}>
                         <i-button padding={{ left: '1.5rem', right: '1.5rem', top: '1rem', bottom: '1rem' }}
                             caption={btnData.btnTxt} font={{ color: btnData.btnTxtColor, size: btnData.btnTxtFontSize }}
                             background={{ color: btnData.btnBGColor }}></i-button>
@@ -269,7 +268,7 @@ export default class GeneralContent extends Module implements PageBlock {
 
                 </i-panel>
 
-                <i-panel id="viewPage" width="60%">
+                <i-panel id="viewPage" width="60%" padding={{ left: '2rem', top: '2rem', right: '2rem', bottom: '2rem' }}>
                     <i-label caption="Content preview"></i-label>
                     <i-vstack id="preview" width="100%" />
                 </i-panel>
