@@ -40,7 +40,8 @@ define("@modules/general-content", ["require", "exports", "@ijstech/components",
         constructor() {
             super(...arguments);
             this.alignmentChoices = [
-                { value: "textLeft", label: "left" }, { value: "textRight", label: "right" }, { value: "textCenter", label: "center" }, { value: "textJustify", label: "justify" }
+                { value: "textLeft", label: "left" }, { value: "textRight", label: "right" },
+                { value: "textCenter", label: "center" }, { value: "textJustify", label: "justify" }
             ];
             this.tag = {};
             this.defaultEdit = true;
@@ -89,22 +90,35 @@ define("@modules/general-content", ["require", "exports", "@ijstech/components",
             this.autoElm.selectedValue = value.auto;
         }
         async edit() {
+            if (this.data != undefined)
+                this.tempData = this.deepCopyGeneralContentData(this.data);
             this.editPage.visible = true;
             this.viewPage.visible = true;
             this.editPage.width = "40%";
             this.viewPage.width = "60%";
         }
         async confirm() {
+            this.setData(this.tempData);
             this.editPage.visible = false;
             this.viewPage.visible = true;
             this.editPage.width = "0%";
             this.viewPage.width = "100%";
         }
         async discard() {
+            if (this.data != undefined)
+                this.tempData = this.deepCopyGeneralContentData(this.data);
             this.editPage.visible = false;
             this.viewPage.visible = true;
             this.editPage.width = "0%";
             this.viewPage.width = "100%";
+        }
+        deepCopyGeneralContentData(toBeCopied) {
+            let newList;
+            for (let i = 0; i < toBeCopied.contentList.length; i++) {
+                newList.contentList.push(toBeCopied.contentList[i]);
+            }
+            newList.title = toBeCopied.title;
+            return newList;
         }
         handleTitleCaptionChange() {
             this.tempData.title.titleContent = this.titleInput.value;
@@ -133,9 +147,7 @@ define("@modules/general-content", ["require", "exports", "@ijstech/components",
             this.renderPreview();
         }
         handleContentAlignmentChange(value, type) {
-            console.log(value.parentNode);
             let index = this.tempData.contentList.findIndex(e => e.contentId == value.parentNode.id.split("_")[1]); // workaround
-            console.log(index);
             if (type == "p") {
                 this.tempData.contentList[index].content.paraAlignment = value.value.value;
             }
@@ -174,6 +186,15 @@ define("@modules/general-content", ["require", "exports", "@ijstech/components",
             this.tempData.contentList[index].content.btnLink = value.value;
             this.renderPreview();
         }
+        removeAContent(value) {
+            let index = this.tempData.contentList.findIndex(e => e.contentId == value.id.split("_")[1]);
+            // remove the VStack
+            let vstackToBeRemoved = document.getElementById(`vstack_${this.tempData.contentList[index].contentId}`);
+            vstackToBeRemoved.parentNode.removeChild(vstackToBeRemoved);
+            // remove the data
+            this.tempData.contentList = this.tempData.contentList.filter(e => e.contentId != index.toString());
+            this.renderPreview();
+        }
         addParagraph() {
             let newContentId = this.tempData.contentList.length.toString();
             this.tempData.contentList.push({
@@ -186,8 +207,10 @@ define("@modules/general-content", ["require", "exports", "@ijstech/components",
                 type: "paragraph",
                 contentId: newContentId
             });
-            this.content.append(this.$render("i-vstack", { width: "100%" },
-                this.$render("i-label", { caption: `Content ${newContentId + 1}` }),
+            this.content.append(this.$render("i-vstack", { id: `vstack_${newContentId}`, width: "100%", background: { color: '#aba6a6' }, margin: { top: '10px' }, padding: { top: '0.5rem', bottom: "0.5rem", left: "0.5rem", right: "0.5rem" }, gap: "10px" },
+                this.$render("i-hstack", { width: "100%", justifyContent: 'space-between', verticalAlignment: 'center' },
+                    this.$render("i-label", { caption: `Content ${parseInt(newContentId) + 1}` }),
+                    this.$render("i-button", { id: `removeBtn_${newContentId}`, caption: "remove", padding: { top: '0.5rem', bottom: '0.5rem', left: '1rem', right: '1rem' }, onClick: (value) => this.removeAContent(value) })),
                 this.$render("i-hstack", { width: "100%" },
                     this.$render("i-label", { caption: "Color" }),
                     this.$render("i-input", { id: `Pcolor_${newContentId}`, inputType: 'color', onChanged: (value) => this.handleContentColorChange(value, "p") })),
@@ -196,7 +219,7 @@ define("@modules/general-content", ["require", "exports", "@ijstech/components",
                     this.$render("i-input", { id: `Palign_${newContentId}`, value: this.alignmentChoices[0], items: this.alignmentChoices, inputType: "combobox", onChanged: (value) => this.handleContentAlignmentChange(value, "p") })),
                 this.$render("i-hstack", { width: "100%" },
                     this.$render("i-label", { caption: "Font size" }),
-                    this.$render("i-input", { id: `PfontSize_${newContentId}`, value: 20, inputType: "number", onChanged: (value) => this.handleContentFontSizeChange(value, "p") })),
+                    this.$render("i-input", { id: `PfontSize_${newContentId}`, value: 20, inputType: "number", width: "70px", onChanged: (value) => this.handleContentFontSizeChange(value, "p") })),
                 this.$render("i-label", { caption: "Caption" }),
                 this.$render("i-input", { id: `Pcaption_${newContentId}`, inputType: "textarea", placeholder: "Input the title here", width: '100%', height: "150px", onChanged: (value) => this.handleContentCaptionChange(value, "p") })));
             this.renderPreview();
@@ -215,8 +238,10 @@ define("@modules/general-content", ["require", "exports", "@ijstech/components",
                 type: "button",
                 contentId: newContentId
             });
-            this.content.append(this.$render("i-vstack", { width: "100%" },
-                this.$render("i-label", { caption: `Content ${newContentId + 1}` }),
+            this.content.append(this.$render("i-vstack", { id: `vstack_${newContentId}`, width: "100%", background: { color: '#aba6a6' }, margin: { top: '10px' }, padding: { top: '0.5rem', bottom: "0.5rem", left: "0.5rem", right: "0.5rem" }, gap: "10px" },
+                this.$render("i-hstack", { width: "100%", justifyContent: 'space-between', verticalAlignment: 'center' },
+                    this.$render("i-label", { caption: `Content ${parseInt(newContentId) + 1}` }),
+                    this.$render("i-button", { id: `removeBtn_${newContentId}`, caption: "remove", padding: { top: '0.5rem', bottom: '0.5rem', left: '1rem', right: '1rem' }, onClick: (value) => this.removeAContent(value) })),
                 this.$render("i-hstack", { width: "100%" },
                     this.$render("i-label", { caption: "Text color" }),
                     this.$render("i-input", { id: `Bcolor_${newContentId}`, inputType: 'color', onChanged: (value) => this.handleContentColorChange(value, "b") })),
@@ -228,11 +253,13 @@ define("@modules/general-content", ["require", "exports", "@ijstech/components",
                     this.$render("i-input", { id: `BAlignment_${newContentId}`, value: this.alignmentChoices[0], items: this.alignmentChoices, inputType: "combobox", onChanged: (value) => this.handleContentAlignmentChange(value, "b") })),
                 this.$render("i-hstack", { width: "100%" },
                     this.$render("i-label", { caption: "Font size" }),
-                    this.$render("i-input", { id: `BFontSize_${newContentId}`, value: 20, inputType: "number", onChanged: (value) => this.handleContentFontSizeChange(value, "b") })),
-                this.$render("i-label", { caption: "Caption" }),
-                this.$render("i-input", { id: `BCaption_${newContentId}`, inputType: "textarea", placeholder: "Input the title here", width: '100%', height: "30px", onChanged: (value) => this.handleContentCaptionChange(value, "b") }),
-                this.$render("i-label", { caption: "Link" }),
-                this.$render("i-input", { id: `BLink_${newContentId}`, inputType: "textarea", placeholder: "Input the link here", width: '100%', height: "30px", onChanged: (value) => this.handleButtonLinkChange(value) })));
+                    this.$render("i-input", { id: `BFontSize_${newContentId}`, value: 20, inputType: "number", width: "70px", onChanged: (value) => this.handleContentFontSizeChange(value, "b") })),
+                this.$render("i-hstack", { width: "100%", gap: "5px", verticalAlignment: 'center' },
+                    this.$render("i-label", { caption: "Caption: " }),
+                    this.$render("i-input", { id: `BCaption_${newContentId}`, inputType: "textarea", placeholder: "Input the title here", width: '100%', height: "30px", onChanged: (value) => this.handleContentCaptionChange(value, "b") })),
+                this.$render("i-hstack", { width: "100%", gap: "5px", verticalAlignment: 'center' },
+                    this.$render("i-label", { caption: "Link" }),
+                    this.$render("i-input", { id: `BLink_${newContentId}`, inputType: "textarea", placeholder: "Input the link here", width: '100%', height: "30px", onChanged: (value) => this.handleButtonLinkChange(value) }))));
             this.renderPreview();
         }
         handleClickBtn(value) {
@@ -240,7 +267,6 @@ define("@modules/general-content", ["require", "exports", "@ijstech/components",
             window.open(this.tempData.contentList[index].content.btnLink);
         }
         renderPreview() {
-            console.log("renderPreview: ", this.tempData);
             this.preview.clearInnerHTML();
             // render preview title
             let text = document.createElement("p");
@@ -253,7 +279,6 @@ define("@modules/general-content", ["require", "exports", "@ijstech/components",
             for (let i = 0; i < this.tempData.contentList.length; i++) {
                 if (this.tempData.contentList[i].type == "paragraph") {
                     let text = document.createElement("p");
-                    console.log(this.tempData.contentList[i].content.paraAlignment);
                     text.classList.add(this.tempData.contentList[i].content.paraAlignment);
                     text.innerHTML = this.tempData.contentList[i].content.paraContent;
                     text.style.fontSize = this.tempData.contentList[i].content.paraFontsize;
@@ -273,9 +298,9 @@ define("@modules/general-content", ["require", "exports", "@ijstech/components",
         render() {
             return this.$render("i-panel", { id: "mainPnl", width: "100%" },
                 this.$render("i-hstack", { width: "100%" },
-                    this.$render("i-panel", { id: "editPage", width: "40%", padding: { left: '2rem', top: '2rem', right: '2rem', bottom: '2rem' } },
+                    this.$render("i-panel", { id: "editPage", width: "40%", padding: { left: '2rem', top: '2rem', right: '2rem', bottom: '2rem' }, border: { right: { width: '1px', style: "solid", color: "gray" } } },
                         this.$render("i-label", { caption: "Content page setting" }),
-                        this.$render("i-vstack", { id: "titleSetting", width: "100%", gap: "10px" },
+                        this.$render("i-vstack", { id: "titleSetting", width: "100%", gap: "10px", background: { color: '#aba6a6' }, margin: { top: '10px' }, padding: { top: '0.5rem', bottom: "0.5rem", left: "0.5rem", right: "0.5rem" } },
                             this.$render("i-label", { caption: "Title" }),
                             this.$render("i-hstack", { width: "100%" },
                                 this.$render("i-label", { caption: "Color" }),
@@ -285,11 +310,11 @@ define("@modules/general-content", ["require", "exports", "@ijstech/components",
                                 this.$render("i-input", { id: "titleAlignmentPicker", value: this.alignmentChoices[0], items: this.alignmentChoices, inputType: "combobox", onChanged: this.handleTitleAlignmentChange })),
                             this.$render("i-hstack", { width: "100%" },
                                 this.$render("i-label", { caption: "Font size" }),
-                                this.$render("i-input", { id: "titleFontSizeInput", value: 20, inputType: "number", onChanged: this.handleTitleFontSizeChange })),
+                                this.$render("i-input", { id: "titleFontSizeInput", width: "70%", value: 20, inputType: "number", onChanged: this.handleTitleFontSizeChange })),
                             this.$render("i-label", { caption: "Caption" }),
                             this.$render("i-input", { id: 'titleInput', inputType: "textarea", placeholder: "Input the title here", width: '100%', height: "150px", onChanged: this.handleTitleCaptionChange })),
                         this.$render("i-vstack", { id: "contentSetting", width: "100%", gap: "10px" },
-                            this.$render("i-label", { caption: "Content" }),
+                            this.$render("i-label", { caption: "Content", margin: { top: '1rem' } }),
                             this.$render("i-panel", { id: "content", width: "100%" }),
                             this.$render("i-hstack", { width: "100%", justifyContent: 'center', gap: "20px" },
                                 this.$render("i-button", { caption: "Add a paragragh", padding: { left: '10px', top: '5px', right: '10px', bottom: '5px' }, onClick: this.addParagraph }),
