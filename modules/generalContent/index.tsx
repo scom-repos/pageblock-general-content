@@ -24,6 +24,7 @@ interface GeneralContentData {
 
 interface ContentData {
     content: ParagraphData | ButtonData,
+    contentId: string,
     type: ContentType
 }
 
@@ -39,7 +40,8 @@ interface ButtonData {
     btnTxtColor: string,
     btnTxtFontSize: string,
     btnBGColor: string,
-    btnAlignment: string
+    btnAlignment: string,
+    btnLink: string
 }
 
 @customModule
@@ -61,7 +63,7 @@ export default class GeneralContent extends Module implements PageBlock {
 
     private tempData: GeneralContentData;
     private alignmentChoices: IComboItem[] = [
-        { value: "start", label: "left" }, { value: "end", label: "right" }, { value: "center", label: "center" }
+        { value: "textLeft", label: "left" }, { value: "textRight", label: "right" }, { value: "textCenter", label: "center" }, { value: "textJustify", label: "justify" }
     ];
 
     tag: any = {};
@@ -148,81 +150,199 @@ export default class GeneralContent extends Module implements PageBlock {
         this.viewPage.width = "100%";
     }
 
+    private handleTitleCaptionChange() {
+        this.tempData.title.titleContent = this.titleInput.value;
+        this.renderPreview();
+    }
+
+    private handleTitleColorChange() {
+        this.tempData.title.titleFontColor = this.titleColorPicker.value;
+        this.renderPreview();
+    }
+
+    private handleTitleAlignmentChange() {
+        this.tempData.title.titleAlignment = this.titleAlignmentPicker.value.value;
+        this.renderPreview();
+    }
+
+    private handleTitleFontSizeChange() {
+        this.tempData.title.titleFontsize = this.titleFontSizeInput.value + 'px';
+        this.renderPreview();
+    }
+
+    private handleContentColorChange(value: any, type: string) {
+        let index = this.tempData.contentList.findIndex(e => e.contentId == value.id.split("_")[1])
+        if (type == "p") {
+            (this.tempData.contentList[index].content as ParagraphData).paraFontColor = value.value;
+        } else if (type == "b") {
+            (this.tempData.contentList[index].content as ButtonData).btnTxtColor = value.value;
+        }
+        this.renderPreview();
+    }
+
+    private handleContentAlignmentChange(value: any, type: string) {
+        console.log(value.parentNode);
+        let index = this.tempData.contentList.findIndex(e => e.contentId == value.parentNode.id.split("_")[1]) // workaround
+        console.log(index);
+        if (type == "p") {
+            (this.tempData.contentList[index].content as ParagraphData).paraAlignment = value.value.value;
+        } else if (type == "b") {
+            (this.tempData.contentList[index].content as ButtonData).btnAlignment = value.value.value;
+        }
+        this.renderPreview();
+    }
+
+    private handleContentFontSizeChange(value: any, type: string) {
+        let index = this.tempData.contentList.findIndex(e => e.contentId == value.id.split("_")[1])
+        if (type == "p") {
+            (this.tempData.contentList[index].content as ParagraphData).paraFontsize = value.value + 'px';
+        } else if (type == "b") {
+            (this.tempData.contentList[index].content as ButtonData).btnTxtFontSize = value.value + 'px';
+        }
+        this.renderPreview();
+    }
+
+    private handleContentCaptionChange(value: any, type: string) {
+        let index = this.tempData.contentList.findIndex(e => e.contentId == value.id.split("_")[1])
+        if (type == "p") {
+            (this.tempData.contentList[index].content as ParagraphData).paraContent = value.value;
+        } else if (type == "b") {
+            (this.tempData.contentList[index].content as ButtonData).btnTxt = value.value;
+        }
+        this.renderPreview();
+    }
+
+    private handleButtonColorChange(value: any) {
+        let index = this.tempData.contentList.findIndex(e => e.contentId == value.id.split("_")[1]);
+        (this.tempData.contentList[index].content as ButtonData).btnBGColor = value.value;
+        this.renderPreview();
+    }
+
+    private handleButtonLinkChange(value: any) {
+        let index = this.tempData.contentList.findIndex(e => e.contentId == value.id.split("_")[1]);
+        (this.tempData.contentList[index].content as ButtonData).btnLink = value.value;
+        this.renderPreview();
+    }
+
     private addParagraph() {
+        let newContentId = this.tempData.contentList.length.toString();
         this.tempData.contentList.push({
             content: {
-                paraContent: '',
+                paraContent: 'new paragraph',
                 paraFontsize: '15px',
                 paraFontColor: '#000000',
                 paraAlignment: 'start'
             } as ParagraphData,
-            type: "paragraph"
+            type: "paragraph",
+            contentId: newContentId
         } as ContentData)
+        this.content.append(
+            <i-vstack width="100%">
+                <i-label caption={`Content ${newContentId + 1}`}></i-label>
+                <i-hstack width={"100%"}>
+                    <i-label caption="Color"></i-label>
+                    <i-input id={`Pcolor_${newContentId}`} inputType='color' onChanged={(value) => this.handleContentColorChange(value, "p")}></i-input>
+                </i-hstack>
+                <i-hstack width={"100%"}>
+                    <i-label caption="Alignment"></i-label>
+                    <i-input id={`Palign_${newContentId}`} value={this.alignmentChoices[0]} items={this.alignmentChoices} inputType="combobox"
+                        onChanged={(value) => this.handleContentAlignmentChange(value, "p")}></i-input>
+                </i-hstack>
+                <i-hstack width={"100%"}>
+                    <i-label caption="Font size"></i-label>
+                    <i-input id={`PfontSize_${newContentId}`} value={20} inputType="number" onChanged={(value) => this.handleContentFontSizeChange(value, "p")}></i-input>
+                </i-hstack>
+                <i-label caption="Caption"></i-label>
+                <i-input id={`Pcaption_${newContentId}`} inputType="textarea" placeholder="Input the title here" width={'100%'} height={"150px"}
+                    onChanged={(value) => this.handleContentCaptionChange(value, "p")} ></i-input>
+            </i-vstack>
+        )
+        this.renderPreview();
     }
 
     private addButtons() {
+        let newContentId = this.tempData.contentList.length.toString();
         this.tempData.contentList.push({
             content: {
                 btnTxt: 'More',
                 btnTxtColor: '#000000',
                 btnTxtFontSize: '13',
                 btnBGColor: "#ff6600",
-                btnAlignment: "center"
+                btnAlignment: "center",
+                btnLink: ""
             } as ButtonData,
-            type: "button"
+            type: "button",
+            contentId: newContentId
         } as ContentData)
+        this.content.append(
+            <i-vstack width="100%">
+                <i-label caption={`Content ${newContentId + 1}`}></i-label>
+                <i-hstack width={"100%"}>
+                    <i-label caption="Text color"></i-label>
+                    <i-input id={`Bcolor_${newContentId}`} inputType='color' onChanged={(value) => this.handleContentColorChange(value, "b")}></i-input>
+                </i-hstack>
+                <i-hstack width={"100%"}>
+                    <i-label caption="Background color"></i-label>
+                    <i-input id={`BBGcolor_${newContentId}`} inputType='color' onChanged={(value) => this.handleButtonColorChange(value)}></i-input>
+                </i-hstack>
+                <i-hstack width={"100%"}>
+                    <i-label caption="Alignment"></i-label>
+                    <i-input id={`BAlignment_${newContentId}`} value={this.alignmentChoices[0]} items={this.alignmentChoices} inputType="combobox"
+                        onChanged={(value) => this.handleContentAlignmentChange(value, "b")}></i-input>
+                </i-hstack>
+                <i-hstack width={"100%"}>
+                    <i-label caption="Font size"></i-label>
+                    <i-input id={`BFontSize_${newContentId}`} value={20} inputType="number"
+                        onChanged={(value) => this.handleContentFontSizeChange(value, "b")}></i-input>
+                </i-hstack>
+                <i-label caption="Caption"></i-label>
+                <i-input id={`BCaption_${newContentId}`} inputType="textarea" placeholder="Input the title here" width={'100%'} height={"30px"}
+                    onChanged={(value) => this.handleContentCaptionChange(value, "b")} ></i-input>
+                <i-label caption="Link"></i-label>
+                <i-input id={`BLink_${newContentId}`} inputType="textarea" placeholder="Input the link here" width={'100%'} height={"30px"}
+                    onChanged={(value) => this.handleButtonLinkChange(value)} ></i-input>
+            </i-vstack>
+        )
+        this.renderPreview();
     }
 
-    private handleTitleCaptionChange() {
-        this.tempData.title.titleContent = this.titleInput.value;
-        this.renderUI();
+    private handleClickBtn(value: any) {
+        let index = this.tempData.contentList.findIndex(e => e.contentId == value.id.split("_")[1]);
+        window.open((this.tempData.contentList[index].content as ButtonData).btnLink)
     }
 
-    private handleTitleColorChange() {
-        this.tempData.title.titleFontColor = this.titleColorPicker.value;
-        this.renderUI();
-    }
-
-    private handleTitleAlignmentChange() {
-        this.tempData.title.titleAlignment = this.titleAlignmentPicker.value.value;
-        this.renderUI();
-    }
-
-    private handleTitleFontSizeChange() {
-        this.tempData.title.titleFontsize = this.titleFontSizeInput.value + 'px';
-        this.renderUI();
-    }
-
-    private renderUI() {
+    private renderPreview() {
+        console.log("renderPreview: ", this.tempData);
 
         this.preview.clearInnerHTML();
+        // render preview title
+        let text = document.createElement("p")
+        text.classList.add(this.tempData.title.titleAlignment)
+        text.innerHTML = this.tempData.title.titleContent
+        text.style.fontSize = this.tempData.title.titleFontsize
+        text.style.color = this.tempData.title.titleFontColor
 
-        // render title
-        this.preview.append(
-            <i-hstack id="tempHStack" width="100%" horizontalAlignment={this.tempData.title.titleAlignment as any}>
-                <i-label font={{ size: this.tempData.title.titleFontsize, color: this.tempData.title.titleFontColor }}
-                    caption={this.tempData.title.titleContent}></i-label>
-            </i-hstack>
-        )
+        this.preview.append(text)
 
-        // render content
+        // render preview content
         for (let i = 0; i < this.tempData.contentList.length; i++) {
-
             if (this.tempData.contentList[i].type == "paragraph") {
-                this.preview.append(
-                    <i-hstack id="tempHStack" width="100%" horizontalAlignment={(this.tempData.contentList[i].content as ParagraphData).paraAlignment as any}>
-                        <i-label font={{ size: this.tempData.title.titleFontsize, color: this.tempData.title.titleFontColor }}
-                            caption={this.tempData.title.titleContent} wordBreak={"break-all"} overflowWrap={"break-word"}></i-label>
-                    </i-hstack>
-                )
+                let text = document.createElement("p")
+                console.log((this.tempData.contentList[i].content as ParagraphData).paraAlignment)
+                text.classList.add((this.tempData.contentList[i].content as ParagraphData).paraAlignment)
+                text.innerHTML = (this.tempData.contentList[i].content as ParagraphData).paraContent
+                text.style.fontSize = (this.tempData.contentList[i].content as ParagraphData).paraFontsize
+                text.style.color = (this.tempData.contentList[i].content as ParagraphData).paraFontColor
+
+                this.preview.append(text)
 
             } else if (this.tempData.contentList[i].type == "button") {
                 let btnData = this.tempData.contentList[i].content as ButtonData
                 this.preview.append(
-                    <i-hstack id="tempHStack" width="100%" horizontalAlignment={btnData.btnAlignment as any}>
-                        <i-button padding={{ left: '1.5rem', right: '1.5rem', top: '1rem', bottom: '1rem' }}
+                    <i-hstack width="100%" horizontalAlignment={btnData.btnAlignment as any}>
+                        <i-button id={`btnLink_${this.tempData.contentList[i].contentId}`} padding={{ left: '1.5rem', right: '1.5rem', top: '1rem', bottom: '1rem' }}
                             caption={btnData.btnTxt} font={{ color: btnData.btnTxtColor, size: btnData.btnTxtFontSize }}
-                            background={{ color: btnData.btnBGColor }}></i-button>
+                            background={{ color: btnData.btnBGColor }} onClick={(value) => this.handleClickBtn(value)}></i-button>
                     </i-hstack>
                 )
             } else {
@@ -247,14 +367,14 @@ export default class GeneralContent extends Module implements PageBlock {
                         </i-hstack>
                         <i-hstack width={"100%"}>
                             <i-label caption="Alignment"></i-label>
-                            <i-input id="titleAlignmentPicker" items={this.alignmentChoices} inputType="combobox" onChanged={this.handleTitleAlignmentChange}></i-input>
+                            <i-input id="titleAlignmentPicker" value={this.alignmentChoices[0]} items={this.alignmentChoices} inputType="combobox" onChanged={this.handleTitleAlignmentChange}></i-input>
                         </i-hstack>
                         <i-hstack width={"100%"}>
                             <i-label caption="Font size"></i-label>
-                            <i-input id="titleFontSizeInput" inputType="number" onChanged={this.handleTitleFontSizeChange}></i-input>
+                            <i-input id="titleFontSizeInput" value={20} inputType="number" onChanged={this.handleTitleFontSizeChange}></i-input>
                         </i-hstack>
                         <i-label caption="Caption"></i-label>
-                        <i-input id='titleInput' inputType="textarea" placeholder="Input the title here" width={'100%'} height={"200px"} onChanged={this.handleTitleCaptionChange} ></i-input>
+                        <i-input id='titleInput' inputType="textarea" placeholder="Input the title here" width={'100%'} height={"150px"} onChanged={this.handleTitleCaptionChange} ></i-input>
                     </i-vstack>
 
                     <i-vstack id="contentSetting" width="100%" gap="10px">

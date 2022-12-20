@@ -13,7 +13,24 @@ define("@modules/general-content/generalContent.css.ts", ["require", "exports", 
     Object.defineProperty(exports, "__esModule", { value: true });
     const Theme = components_1.Styles.Theme.ThemeVars;
     components_1.Styles.cssRule('#mainPnl', {
-        $nest: {}
+        $nest: {
+            '.textCenter': {
+                textAlign: 'center',
+                overflowWrap: 'break-word'
+            },
+            '.textLeft': {
+                textAlign: 'left',
+                overflowWrap: 'break-word'
+            },
+            '.textRight': {
+                textAlign: 'right',
+                overflowWrap: 'break-word'
+            },
+            '.textJustify': {
+                textAlign: 'justify',
+                overflowWrap: 'break-word'
+            }
+        }
     });
 });
 define("@modules/general-content", ["require", "exports", "@ijstech/components", "@modules/general-content/generalContent.css.ts"], function (require, exports, components_2) {
@@ -23,7 +40,7 @@ define("@modules/general-content", ["require", "exports", "@ijstech/components",
         constructor() {
             super(...arguments);
             this.alignmentChoices = [
-                { value: "start", label: "left" }, { value: "end", label: "right" }, { value: "center", label: "center" }
+                { value: "textLeft", label: "left" }, { value: "textRight", label: "right" }, { value: "textCenter", label: "center" }, { value: "textJustify", label: "justify" }
             ];
             this.tag = {};
             this.defaultEdit = true;
@@ -89,60 +106,164 @@ define("@modules/general-content", ["require", "exports", "@ijstech/components",
             this.editPage.width = "0%";
             this.viewPage.width = "100%";
         }
+        handleTitleCaptionChange() {
+            this.tempData.title.titleContent = this.titleInput.value;
+            this.renderPreview();
+        }
+        handleTitleColorChange() {
+            this.tempData.title.titleFontColor = this.titleColorPicker.value;
+            this.renderPreview();
+        }
+        handleTitleAlignmentChange() {
+            this.tempData.title.titleAlignment = this.titleAlignmentPicker.value.value;
+            this.renderPreview();
+        }
+        handleTitleFontSizeChange() {
+            this.tempData.title.titleFontsize = this.titleFontSizeInput.value + 'px';
+            this.renderPreview();
+        }
+        handleContentColorChange(value, type) {
+            let index = this.tempData.contentList.findIndex(e => e.contentId == value.id.split("_")[1]);
+            if (type == "p") {
+                this.tempData.contentList[index].content.paraFontColor = value.value;
+            }
+            else if (type == "b") {
+                this.tempData.contentList[index].content.btnTxtColor = value.value;
+            }
+            this.renderPreview();
+        }
+        handleContentAlignmentChange(value, type) {
+            console.log(value.parentNode);
+            let index = this.tempData.contentList.findIndex(e => e.contentId == value.parentNode.id.split("_")[1]); // workaround
+            console.log(index);
+            if (type == "p") {
+                this.tempData.contentList[index].content.paraAlignment = value.value.value;
+            }
+            else if (type == "b") {
+                this.tempData.contentList[index].content.btnAlignment = value.value.value;
+            }
+            this.renderPreview();
+        }
+        handleContentFontSizeChange(value, type) {
+            let index = this.tempData.contentList.findIndex(e => e.contentId == value.id.split("_")[1]);
+            if (type == "p") {
+                this.tempData.contentList[index].content.paraFontsize = value.value + 'px';
+            }
+            else if (type == "b") {
+                this.tempData.contentList[index].content.btnTxtFontSize = value.value + 'px';
+            }
+            this.renderPreview();
+        }
+        handleContentCaptionChange(value, type) {
+            let index = this.tempData.contentList.findIndex(e => e.contentId == value.id.split("_")[1]);
+            if (type == "p") {
+                this.tempData.contentList[index].content.paraContent = value.value;
+            }
+            else if (type == "b") {
+                this.tempData.contentList[index].content.btnTxt = value.value;
+            }
+            this.renderPreview();
+        }
+        handleButtonColorChange(value) {
+            let index = this.tempData.contentList.findIndex(e => e.contentId == value.id.split("_")[1]);
+            this.tempData.contentList[index].content.btnBGColor = value.value;
+            this.renderPreview();
+        }
+        handleButtonLinkChange(value) {
+            let index = this.tempData.contentList.findIndex(e => e.contentId == value.id.split("_")[1]);
+            this.tempData.contentList[index].content.btnLink = value.value;
+            this.renderPreview();
+        }
         addParagraph() {
+            let newContentId = this.tempData.contentList.length.toString();
             this.tempData.contentList.push({
                 content: {
-                    paraContent: '',
+                    paraContent: 'new paragraph',
                     paraFontsize: '15px',
                     paraFontColor: '#000000',
                     paraAlignment: 'start'
                 },
-                type: "paragraph"
+                type: "paragraph",
+                contentId: newContentId
             });
+            this.content.append(this.$render("i-vstack", { width: "100%" },
+                this.$render("i-label", { caption: `Content ${newContentId + 1}` }),
+                this.$render("i-hstack", { width: "100%" },
+                    this.$render("i-label", { caption: "Color" }),
+                    this.$render("i-input", { id: `Pcolor_${newContentId}`, inputType: 'color', onChanged: (value) => this.handleContentColorChange(value, "p") })),
+                this.$render("i-hstack", { width: "100%" },
+                    this.$render("i-label", { caption: "Alignment" }),
+                    this.$render("i-input", { id: `Palign_${newContentId}`, value: this.alignmentChoices[0], items: this.alignmentChoices, inputType: "combobox", onChanged: (value) => this.handleContentAlignmentChange(value, "p") })),
+                this.$render("i-hstack", { width: "100%" },
+                    this.$render("i-label", { caption: "Font size" }),
+                    this.$render("i-input", { id: `PfontSize_${newContentId}`, value: 20, inputType: "number", onChanged: (value) => this.handleContentFontSizeChange(value, "p") })),
+                this.$render("i-label", { caption: "Caption" }),
+                this.$render("i-input", { id: `Pcaption_${newContentId}`, inputType: "textarea", placeholder: "Input the title here", width: '100%', height: "150px", onChanged: (value) => this.handleContentCaptionChange(value, "p") })));
+            this.renderPreview();
         }
         addButtons() {
+            let newContentId = this.tempData.contentList.length.toString();
             this.tempData.contentList.push({
                 content: {
                     btnTxt: 'More',
                     btnTxtColor: '#000000',
                     btnTxtFontSize: '13',
                     btnBGColor: "#ff6600",
-                    btnAlignment: "center"
+                    btnAlignment: "center",
+                    btnLink: ""
                 },
-                type: "button"
+                type: "button",
+                contentId: newContentId
             });
+            this.content.append(this.$render("i-vstack", { width: "100%" },
+                this.$render("i-label", { caption: `Content ${newContentId + 1}` }),
+                this.$render("i-hstack", { width: "100%" },
+                    this.$render("i-label", { caption: "Text color" }),
+                    this.$render("i-input", { id: `Bcolor_${newContentId}`, inputType: 'color', onChanged: (value) => this.handleContentColorChange(value, "b") })),
+                this.$render("i-hstack", { width: "100%" },
+                    this.$render("i-label", { caption: "Background color" }),
+                    this.$render("i-input", { id: `BBGcolor_${newContentId}`, inputType: 'color', onChanged: (value) => this.handleButtonColorChange(value) })),
+                this.$render("i-hstack", { width: "100%" },
+                    this.$render("i-label", { caption: "Alignment" }),
+                    this.$render("i-input", { id: `BAlignment_${newContentId}`, value: this.alignmentChoices[0], items: this.alignmentChoices, inputType: "combobox", onChanged: (value) => this.handleContentAlignmentChange(value, "b") })),
+                this.$render("i-hstack", { width: "100%" },
+                    this.$render("i-label", { caption: "Font size" }),
+                    this.$render("i-input", { id: `BFontSize_${newContentId}`, value: 20, inputType: "number", onChanged: (value) => this.handleContentFontSizeChange(value, "b") })),
+                this.$render("i-label", { caption: "Caption" }),
+                this.$render("i-input", { id: `BCaption_${newContentId}`, inputType: "textarea", placeholder: "Input the title here", width: '100%', height: "30px", onChanged: (value) => this.handleContentCaptionChange(value, "b") }),
+                this.$render("i-label", { caption: "Link" }),
+                this.$render("i-input", { id: `BLink_${newContentId}`, inputType: "textarea", placeholder: "Input the link here", width: '100%', height: "30px", onChanged: (value) => this.handleButtonLinkChange(value) })));
+            this.renderPreview();
         }
-        handleTitleCaptionChange() {
-            this.tempData.title.titleContent = this.titleInput.value;
-            this.renderUI();
+        handleClickBtn(value) {
+            let index = this.tempData.contentList.findIndex(e => e.contentId == value.id.split("_")[1]);
+            window.open(this.tempData.contentList[index].content.btnLink);
         }
-        handleTitleColorChange() {
-            this.tempData.title.titleFontColor = this.titleColorPicker.value;
-            this.renderUI();
-        }
-        handleTitleAlignmentChange() {
-            this.tempData.title.titleAlignment = this.titleAlignmentPicker.value.value;
-            this.renderUI();
-        }
-        handleTitleFontSizeChange() {
-            this.tempData.title.titleFontsize = this.titleFontSizeInput.value + 'px';
-            this.renderUI();
-        }
-        renderUI() {
+        renderPreview() {
+            console.log("renderPreview: ", this.tempData);
             this.preview.clearInnerHTML();
-            // render title
-            this.preview.append(this.$render("i-hstack", { id: "tempHStack", width: "100%", horizontalAlignment: this.tempData.title.titleAlignment },
-                this.$render("i-label", { font: { size: this.tempData.title.titleFontsize, color: this.tempData.title.titleFontColor }, caption: this.tempData.title.titleContent })));
-            // render content
+            // render preview title
+            let text = document.createElement("p");
+            text.classList.add(this.tempData.title.titleAlignment);
+            text.innerHTML = this.tempData.title.titleContent;
+            text.style.fontSize = this.tempData.title.titleFontsize;
+            text.style.color = this.tempData.title.titleFontColor;
+            this.preview.append(text);
+            // render preview content
             for (let i = 0; i < this.tempData.contentList.length; i++) {
                 if (this.tempData.contentList[i].type == "paragraph") {
-                    this.preview.append(this.$render("i-hstack", { id: "tempHStack", width: "100%", horizontalAlignment: this.tempData.contentList[i].content.paraAlignment },
-                        this.$render("i-label", { font: { size: this.tempData.title.titleFontsize, color: this.tempData.title.titleFontColor }, caption: this.tempData.title.titleContent, wordBreak: "break-all", overflowWrap: "break-word" })));
+                    let text = document.createElement("p");
+                    console.log(this.tempData.contentList[i].content.paraAlignment);
+                    text.classList.add(this.tempData.contentList[i].content.paraAlignment);
+                    text.innerHTML = this.tempData.contentList[i].content.paraContent;
+                    text.style.fontSize = this.tempData.contentList[i].content.paraFontsize;
+                    text.style.color = this.tempData.contentList[i].content.paraFontColor;
+                    this.preview.append(text);
                 }
                 else if (this.tempData.contentList[i].type == "button") {
                     let btnData = this.tempData.contentList[i].content;
-                    this.preview.append(this.$render("i-hstack", { id: "tempHStack", width: "100%", horizontalAlignment: btnData.btnAlignment },
-                        this.$render("i-button", { padding: { left: '1.5rem', right: '1.5rem', top: '1rem', bottom: '1rem' }, caption: btnData.btnTxt, font: { color: btnData.btnTxtColor, size: btnData.btnTxtFontSize }, background: { color: btnData.btnBGColor } })));
+                    this.preview.append(this.$render("i-hstack", { width: "100%", horizontalAlignment: btnData.btnAlignment },
+                        this.$render("i-button", { id: `btnLink_${this.tempData.contentList[i].contentId}`, padding: { left: '1.5rem', right: '1.5rem', top: '1rem', bottom: '1rem' }, caption: btnData.btnTxt, font: { color: btnData.btnTxtColor, size: btnData.btnTxtFontSize }, background: { color: btnData.btnBGColor }, onClick: (value) => this.handleClickBtn(value) })));
                 }
                 else {
                     console.log("Content type does not exist");
@@ -161,12 +282,12 @@ define("@modules/general-content", ["require", "exports", "@ijstech/components",
                                 this.$render("i-input", { id: "titleColorPicker", inputType: 'color', onChanged: this.handleTitleColorChange })),
                             this.$render("i-hstack", { width: "100%" },
                                 this.$render("i-label", { caption: "Alignment" }),
-                                this.$render("i-input", { id: "titleAlignmentPicker", items: this.alignmentChoices, inputType: "combobox", onChanged: this.handleTitleAlignmentChange })),
+                                this.$render("i-input", { id: "titleAlignmentPicker", value: this.alignmentChoices[0], items: this.alignmentChoices, inputType: "combobox", onChanged: this.handleTitleAlignmentChange })),
                             this.$render("i-hstack", { width: "100%" },
                                 this.$render("i-label", { caption: "Font size" }),
-                                this.$render("i-input", { id: "titleFontSizeInput", inputType: "number", onChanged: this.handleTitleFontSizeChange })),
+                                this.$render("i-input", { id: "titleFontSizeInput", value: 20, inputType: "number", onChanged: this.handleTitleFontSizeChange })),
                             this.$render("i-label", { caption: "Caption" }),
-                            this.$render("i-input", { id: 'titleInput', inputType: "textarea", placeholder: "Input the title here", width: '100%', height: "200px", onChanged: this.handleTitleCaptionChange })),
+                            this.$render("i-input", { id: 'titleInput', inputType: "textarea", placeholder: "Input the title here", width: '100%', height: "150px", onChanged: this.handleTitleCaptionChange })),
                         this.$render("i-vstack", { id: "contentSetting", width: "100%", gap: "10px" },
                             this.$render("i-label", { caption: "Content" }),
                             this.$render("i-panel", { id: "content", width: "100%" }),
