@@ -61,6 +61,7 @@ export default class GeneralContent extends Module implements PageBlock {
     private titleAlignmentPicker: Input;
     private titleFontSizeInput: Input;
 
+    private maxContentId = -1;
     private tempData: GeneralContentData;
     private alignmentChoices: IComboItem[] = [
         { value: "textLeft", label: "left" }, { value: "textRight", label: "right" },
@@ -82,7 +83,7 @@ export default class GeneralContent extends Module implements PageBlock {
         this.tempData = {
             title: {
                 titleContent: 'Type the title here',
-                titleFontsize: '18px',
+                titleFontsize: '25px',
                 titleFontColor: '#000000',
                 titleAlignment: 'start'
             },
@@ -158,7 +159,7 @@ export default class GeneralContent extends Module implements PageBlock {
         this.viewPage.visible = true;
         this.editPage.width = "0%";
         this.viewPage.width = "100%";
-        this.removeUnsavedVStack();
+        // this.removeUnsavedVStack();
         this.renderPreview();
     }
 
@@ -288,20 +289,26 @@ export default class GeneralContent extends Module implements PageBlock {
     }
 
     private removeAContent(value: any) {
+        console.log("before remove: ", this.tempData.contentList)
         let index = this.tempData.contentList.findIndex(e => e.contentId == value.id.split("_")[1]);
+        console.log("rm index:", index)
+        console.log("rm id:", value.id)
 
         // remove the VStack
         let vstackToBeRemoved = document.getElementById(`vstack_${this.tempData.contentList[index].contentId}`)
         vstackToBeRemoved.parentNode.removeChild(vstackToBeRemoved);
 
         // remove the data
-        this.tempData.contentList = this.tempData.contentList.filter(e => e.contentId != index.toString());
+        this.tempData.contentList = this.tempData.contentList.filter(e => e.contentId !== value.id.split("_")[1]);
 
         this.renderPreview();
+        console.log("after remove: ", this.tempData.contentList)
     }
 
     private addParagraph() {
-        let newContentId = this.tempData.contentList.length.toString();
+        console.log("before add: ", this.tempData.contentList)
+        this.maxContentId = this.maxContentId + 1
+        let newContentId = (this.maxContentId).toString();
         this.tempData.contentList.push({
             content: {
                 paraContent: 'new paragraph',
@@ -312,42 +319,14 @@ export default class GeneralContent extends Module implements PageBlock {
             type: "paragraph",
             contentId: newContentId
         } as ContentData)
-        this.content.append(
-            <i-vstack id={`vstack_${newContentId}`} class="configVstack" width="100%" background={{ color: '#aba6a6' }} margin={{ top: '10px' }}
-                padding={{ top: '0.5rem', bottom: "0.5rem", left: "0.5rem", right: "0.5rem" }} gap="10px">
-                <i-hstack width="100%" justifyContent='space-between' verticalAlignment='center'>
-                    <i-label caption={`Content ${parseInt(newContentId) + 1}`}></i-label>
-                    <i-button id={`removeBtn_${newContentId}`} caption={"remove"}
-                        padding={{ top: '0.5rem', bottom: '0.5rem', left: '1rem', right: '1rem' }}
-                        onClick={(value) => this.removeAContent(value)}></i-button>
-                </i-hstack>
-                <i-hstack width={"100%"}>
-                    <i-label caption="Color"></i-label>
-                    <i-input id={`Pcolor_${newContentId}`} inputType='color'
-                        onChanged={(value) => this.handleContentColorChange(value, "p")}></i-input>
-                </i-hstack>
-                <i-hstack width={"100%"}>
-                    <i-label caption="Alignment"></i-label>
-                    <i-input id={`Palign_${newContentId}`} value={this.alignmentChoices[0]} items={this.alignmentChoices}
-                        inputType="combobox"
-                        onChanged={(value) => this.handleContentAlignmentChange(value, "p")}></i-input>
-                </i-hstack>
-                <i-hstack width={"100%"}>
-                    <i-label caption="Font size"></i-label>
-                    <i-input id={`PfontSize_${newContentId}`} value={20} inputType="number" width="70px"
-                        onChanged={(value) => this.handleContentFontSizeChange(value, "p")}></i-input>
-                </i-hstack>
-                <i-label caption="Caption"></i-label>
-                <i-input id={`Pcaption_${newContentId}`} inputType="textarea" placeholder="Input the title here"
-                    width={'100%'} height={"150px"}
-                    onChanged={(value) => this.handleContentCaptionChange(value, "p")} ></i-input>
-            </i-vstack>
-        )
+        this.renderConfig();
         this.renderPreview();
+        console.log("after add: ", this.tempData.contentList)
     }
 
     private addButtons() {
-        let newContentId = this.tempData.contentList.length.toString();
+        this.maxContentId = this.maxContentId + 1
+        let newContentId = (this.maxContentId).toString();
         this.tempData.contentList.push({
             content: {
                 btnTxt: 'More',
@@ -360,63 +339,119 @@ export default class GeneralContent extends Module implements PageBlock {
             type: "button",
             contentId: newContentId
         } as ContentData)
-        this.content.append(
-            <i-vstack id={`vstack_${newContentId}`} class="configVstack" width="100%" background={{ color: '#aba6a6' }} margin={{ top: '10px' }}
-                padding={{ top: '0.5rem', bottom: "0.5rem", left: "0.5rem", right: "0.5rem" }} gap="10px">
-                <i-hstack width="100%" justifyContent='space-between' verticalAlignment='center'>
-                    <i-label caption={`Content ${parseInt(newContentId) + 1}`}></i-label>
-                    <i-button id={`removeBtn_${newContentId}`} caption={"remove"}
-                        padding={{ top: '0.5rem', bottom: '0.5rem', left: '1rem', right: '1rem' }}
-                        onClick={(value) => this.removeAContent(value)}></i-button>
-                </i-hstack>
-
-                <i-hstack width={"100%"}>
-                    <i-label caption="Text color"></i-label>
-                    <i-input id={`Bcolor_${newContentId}`} inputType='color'
-                        onChanged={(value) => this.handleContentColorChange(value, "b")}></i-input>
-                </i-hstack>
-
-                <i-hstack width={"100%"}>
-                    <i-label caption="Background color"></i-label>
-                    <i-input id={`BBGcolor_${newContentId}`} inputType='color'
-                        onChanged={(value) => this.handleButtonColorChange(value)}></i-input>
-                </i-hstack>
-
-                <i-hstack width={"100%"}>
-                    <i-label caption="Alignment"></i-label>
-                    <i-input id={`BAlignment_${newContentId}`} value={this.alignmentChoices[0]}
-                        items={this.alignmentChoices} inputType="combobox"
-                        onChanged={(value) => this.handleContentAlignmentChange(value, "b")} ></i-input>
-                </i-hstack>
-
-                <i-hstack width={"100%"}>
-                    <i-label caption="Font size"></i-label>
-                    <i-input id={`BFontSize_${newContentId}`} value={20} inputType="number" width="70px"
-                        onChanged={(value) => this.handleContentFontSizeChange(value, "b")}></i-input>
-                </i-hstack>
-
-                <i-hstack width="100%" gap="5px" verticalAlignment='center'>
-                    <i-label caption="Caption: "></i-label>
-                    <i-input id={`BCaption_${newContentId}`} inputType="textarea"
-                        placeholder="Input the title here" width={'100%'} height={"30px"}
-                        onChanged={(value) => this.handleContentCaptionChange(value, "b")} ></i-input>
-                </i-hstack>
-
-                <i-hstack width="100%" gap="5px" verticalAlignment='center'>
-                    <i-label caption="Link"></i-label>
-                    <i-input id={`BLink_${newContentId}`} inputType="textarea"
-                        placeholder="Input the link here" width={'100%'} height={"30px"}
-                        onChanged={(value) => this.handleButtonLinkChange(value)} ></i-input>
-                </i-hstack>
-
-            </i-vstack>
-        )
+        this.renderConfig();
         this.renderPreview();
     }
 
     private handleClickBtn(value: any) {
         let index = this.tempData.contentList.findIndex(e => e.contentId == value.id.split("_")[1]);
         window.open((this.tempData.contentList[index].content as ButtonData).btnLink)
+    }
+
+    private renderConfig() {
+
+        this.content.clearInnerHTML();
+        for (let i = 0; i < this.tempData.contentList.length; i++) {
+
+            if (this.tempData.contentList[i].type == "paragraph") {
+                let contentId = this.tempData.contentList[i].contentId
+                this.content.append(
+                    <i-vstack id={`vstack_${contentId}`} class="configVstack" width="100%" background={{ color: '#aba6a6' }} margin={{ top: '10px' }}
+                        padding={{ top: '0.5rem', bottom: "0.5rem", left: "0.5rem", right: "0.5rem" }} gap="10px">
+                        <i-hstack width="100%" justifyContent='space-between' verticalAlignment='center'>
+                            <i-label caption={`Content ${contentId}`}></i-label>
+                            <i-button id={`removeBtn_${contentId}`} caption={"remove"}
+                                padding={{ top: '0.5rem', bottom: '0.5rem', left: '1rem', right: '1rem' }}
+                                onClick={(value) => this.removeAContent(value)}></i-button>
+                        </i-hstack>
+                        <i-hstack width={"100%"}>
+                            <i-label caption="Color"></i-label>
+                            <i-input id={`Pcolor_${contentId}`} inputType='color' value={(this.tempData.contentList[i].content as ParagraphData).paraFontColor}
+                                onChanged={(value) => this.handleContentColorChange(value, "p")}></i-input>
+                        </i-hstack>
+                        <i-hstack width={"100%"}>
+                            <i-label caption="Alignment"></i-label>
+                            <i-input id={`Palign_${contentId}`}
+                                items={this.alignmentChoices} inputType="combobox"
+                                onChanged={(value) => this.handleContentAlignmentChange(value, "p")}></i-input>
+                        </i-hstack>
+                        <i-hstack width={"100%"}>
+                            <i-label caption="Font size"></i-label>
+                            <i-input id={`PfontSize_${contentId}`} inputType="number" width="70px"
+                                value={parseInt((this.tempData.contentList[i].content as ParagraphData).paraFontsize) + 1}
+                                onChanged={(value) => this.handleContentFontSizeChange(value, "p")}></i-input>
+                        </i-hstack>
+                        <i-label caption="Caption"></i-label>
+                        <i-input id={`Pcaption_${contentId}`} inputType="textarea" placeholder="Input the title here"
+                            width={'100%'} height={"150px"} value={(this.tempData.contentList[i].content as ParagraphData).paraContent}
+                            onChanged={(value) => this.handleContentCaptionChange(value, "p")} ></i-input>
+                    </i-vstack>
+                )
+
+            } else if (this.tempData.contentList[i].type == "button") {
+
+                let contentId = this.tempData.contentList[i].contentId
+                this.content.append(
+                    <i-vstack id={`vstack_${contentId}`} class="configVstack" width="100%" background={{ color: '#aba6a6' }} margin={{ top: '10px' }}
+                        padding={{ top: '0.5rem', bottom: "0.5rem", left: "0.5rem", right: "0.5rem" }} gap="10px">
+                        <i-hstack width="100%" justifyContent='space-between' verticalAlignment='center'>
+                            <i-label caption={`Content ${contentId}`}></i-label>
+                            <i-button id={`removeBtn_${contentId}`} caption={"remove"}
+                                padding={{ top: '0.5rem', bottom: '0.5rem', left: '1rem', right: '1rem' }}
+                                onClick={(value) => this.removeAContent(value)}></i-button>
+                        </i-hstack>
+
+                        <i-hstack width={"100%"}>
+                            <i-label caption="Text color"></i-label>
+                            <i-input id={`Bcolor_${contentId}`} inputType='color'
+                                value={(this.tempData.contentList[i].content as ButtonData).btnTxtColor}
+                                onChanged={(value) => this.handleContentColorChange(value, "b")}></i-input>
+                        </i-hstack>
+
+                        <i-hstack width={"100%"}>
+                            <i-label caption="Background color"></i-label>
+                            <i-input id={`BBGcolor_${contentId}`} inputType='color'
+                                value={(this.tempData.contentList[i].content as ButtonData).btnBGColor}
+                                onChanged={(value) => this.handleButtonColorChange(value)}></i-input>
+                        </i-hstack>
+
+                        <i-hstack width={"100%"}>
+                            <i-label caption="Alignment"></i-label>
+                            <i-input id={`BAlignment_${contentId}`} value={this.alignmentChoices[0]}
+                                items={this.alignmentChoices} inputType="combobox"
+                                onChanged={(value) => this.handleContentAlignmentChange(value, "b")} ></i-input>
+                        </i-hstack>
+
+                        <i-hstack width={"100%"}>
+                            <i-label caption="Font size"></i-label>
+                            <i-input id={`BFontSize_${contentId}`} inputType="number" width="70px"
+                                value={parseInt((this.tempData.contentList[i].content as ButtonData).btnTxtFontSize.replace("px", ""))}
+                                onChanged={(value) => this.handleContentFontSizeChange(value, "b")}></i-input>
+                        </i-hstack>
+
+                        <i-hstack width="100%" gap="5px" verticalAlignment='center'>
+                            <i-label caption="Caption: "></i-label>
+                            <i-input id={`BCaption_${contentId}`} inputType="textarea"
+                                placeholder="Input the title here" width={'100%'} height={"30px"}
+                                value={(this.tempData.contentList[i].content as ButtonData).btnTxt}
+                                onChanged={(value) => this.handleContentCaptionChange(value, "b")} ></i-input>
+                        </i-hstack>
+
+                        <i-hstack width="100%" gap="5px" verticalAlignment='center'>
+                            <i-label caption="Link"></i-label>
+                            <i-input id={`BLink_${contentId}`} inputType="textarea"
+                                placeholder="Input the link here" width={'100%'} height={"30px"}
+                                value={(this.tempData.contentList[i].content as ButtonData).btnLink}
+                                onChanged={(value) => this.handleButtonLinkChange(value)} ></i-input>
+                        </i-hstack>
+
+                    </i-vstack>
+                )
+
+            } else {
+                console.log("Content type does not exist")
+            }
+        }
     }
 
     private renderPreview() {
@@ -430,7 +465,6 @@ export default class GeneralContent extends Module implements PageBlock {
 
         this.preview.append(text)
 
-        // render preview content
         for (let i = 0; i < this.tempData.contentList.length; i++) {
             if (this.tempData.contentList[i].type == "paragraph") {
                 let text = document.createElement("p")
