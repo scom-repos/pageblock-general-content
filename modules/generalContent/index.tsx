@@ -75,10 +75,10 @@ export default class GeneralContent extends Module implements PageBlock {
 
     async init() {
         super.init();
-        this.initTempData();
+        this.initData();
     }
 
-    initTempData() {
+    initData() {
         this.tempData = {
             title: {
                 titleContent: 'Type the title here',
@@ -88,6 +88,7 @@ export default class GeneralContent extends Module implements PageBlock {
             },
             contentList: []
         }
+        this.data = this.deepCopyGeneralContentData(this.tempData);
     }
 
     async config() {
@@ -114,8 +115,8 @@ export default class GeneralContent extends Module implements PageBlock {
         return this.data;
     }
 
-    async setData(value: any) {
-
+    async setData(value: GeneralContentData) {
+        this.data = this.deepCopyGeneralContentData(value)
     }
 
     getTag() {
@@ -132,10 +133,12 @@ export default class GeneralContent extends Module implements PageBlock {
 
     async edit() {
         if (this.data != undefined) this.tempData = this.deepCopyGeneralContentData(this.data)
+        else { console.log("data is undefined"); }
         this.editPage.visible = true;
         this.viewPage.visible = true;
         this.editPage.width = "40%";
         this.viewPage.width = "60%";
+        this.renderPreview();
     }
 
     async confirm() {
@@ -144,22 +147,71 @@ export default class GeneralContent extends Module implements PageBlock {
         this.viewPage.visible = true;
         this.editPage.width = "0%";
         this.viewPage.width = "100%";
+        this.renderPreview();
+        console.log(this.data)
     }
 
     async discard() {
         if (this.data != undefined) this.tempData = this.deepCopyGeneralContentData(this.data)
+        else { console.log("data is undefined"); }
         this.editPage.visible = false;
         this.viewPage.visible = true;
         this.editPage.width = "0%";
         this.viewPage.width = "100%";
+        this.removeUnsavedVStack();
+        this.renderPreview();
+    }
+
+    private removeUnsavedVStack() {
+        let savedVStack = this.tempData.contentList.map(e => e.contentId)
+        let vStackList = document.getElementsByClassName("configVstack")
+        for (let i = 0; i < vStackList.length; i++) {
+            if (!(savedVStack.includes(vStackList[i].id))) {
+                vStackList[i].parentNode.removeChild(vStackList[i]);
+            }
+        }
     }
 
     private deepCopyGeneralContentData(toBeCopied: GeneralContentData) {
-        let newList: GeneralContentData;
-        for (let i = 0; i < toBeCopied.contentList.length; i++) {
-            newList.contentList.push(toBeCopied.contentList[i])
+        console.log("deepCopyGeneralContentData, toBeCopied: ", toBeCopied)
+        let newList: GeneralContentData = {
+            title: {
+                titleContent: toBeCopied.title.titleContent,
+                titleFontsize: toBeCopied.title.titleFontsize,
+                titleFontColor: toBeCopied.title.titleFontColor,
+                titleAlignment: toBeCopied.title.titleAlignment,
+            },
+            contentList: []
         }
-        newList.title = toBeCopied.title;
+        for (let i = 0; i < toBeCopied.contentList.length; i++) {
+            if (toBeCopied.contentList[i].type == "paragraph") {
+                newList.contentList.push({
+                    contentId: toBeCopied.contentList[i].contentId,
+                    type: toBeCopied.contentList[i].type,
+                    content: {
+                        paraContent: (toBeCopied.contentList[i].content as ParagraphData).paraContent,
+                        paraFontsize: (toBeCopied.contentList[i].content as ParagraphData).paraFontsize,
+                        paraFontColor: (toBeCopied.contentList[i].content as ParagraphData).paraFontColor,
+                        paraAlignment: (toBeCopied.contentList[i].content as ParagraphData).paraAlignment
+                    }
+                })
+            } else if (toBeCopied.contentList[i].type == "button") {
+                newList.contentList.push({
+                    contentId: toBeCopied.contentList[i].contentId,
+                    type: toBeCopied.contentList[i].type,
+                    content: {
+                        btnTxt: (toBeCopied.contentList[i].content as ButtonData).btnTxt,
+                        btnTxtColor: (toBeCopied.contentList[i].content as ButtonData).btnTxtColor,
+                        btnTxtFontSize: (toBeCopied.contentList[i].content as ButtonData).btnTxtFontSize,
+                        btnBGColor: (toBeCopied.contentList[i].content as ButtonData).btnBGColor,
+                        btnAlignment: (toBeCopied.contentList[i].content as ButtonData).btnAlignment,
+                        btnLink: (toBeCopied.contentList[i].content as ButtonData).btnLink,
+                    }
+                })
+            } else {
+                console.log("Content type does not exist")
+            }
+        }
         return newList;
     }
 
@@ -261,7 +313,7 @@ export default class GeneralContent extends Module implements PageBlock {
             contentId: newContentId
         } as ContentData)
         this.content.append(
-            <i-vstack id={`vstack_${newContentId}`} width="100%" background={{ color: '#aba6a6' }} margin={{ top: '10px' }}
+            <i-vstack id={`vstack_${newContentId}`} class="configVstack" width="100%" background={{ color: '#aba6a6' }} margin={{ top: '10px' }}
                 padding={{ top: '0.5rem', bottom: "0.5rem", left: "0.5rem", right: "0.5rem" }} gap="10px">
                 <i-hstack width="100%" justifyContent='space-between' verticalAlignment='center'>
                     <i-label caption={`Content ${parseInt(newContentId) + 1}`}></i-label>
@@ -309,7 +361,7 @@ export default class GeneralContent extends Module implements PageBlock {
             contentId: newContentId
         } as ContentData)
         this.content.append(
-            <i-vstack id={`vstack_${newContentId}`} width="100%" background={{ color: '#aba6a6' }} margin={{ top: '10px' }}
+            <i-vstack id={`vstack_${newContentId}`} class="configVstack" width="100%" background={{ color: '#aba6a6' }} margin={{ top: '10px' }}
                 padding={{ top: '0.5rem', bottom: "0.5rem", left: "0.5rem", right: "0.5rem" }} gap="10px">
                 <i-hstack width="100%" justifyContent='space-between' verticalAlignment='center'>
                     <i-label caption={`Content ${parseInt(newContentId) + 1}`}></i-label>

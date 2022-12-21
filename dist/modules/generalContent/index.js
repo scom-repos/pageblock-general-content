@@ -48,9 +48,9 @@ define("@modules/general-content", ["require", "exports", "@ijstech/components",
         }
         async init() {
             super.init();
-            this.initTempData();
+            this.initData();
         }
-        initTempData() {
+        initData() {
             this.tempData = {
                 title: {
                     titleContent: 'Type the title here',
@@ -60,6 +60,7 @@ define("@modules/general-content", ["require", "exports", "@ijstech/components",
                 },
                 contentList: []
             };
+            this.data = this.deepCopyGeneralContentData(this.tempData);
         }
         async config() {
         }
@@ -78,6 +79,7 @@ define("@modules/general-content", ["require", "exports", "@ijstech/components",
             return this.data;
         }
         async setData(value) {
+            this.data = this.deepCopyGeneralContentData(value);
         }
         getTag() {
             return this.tag;
@@ -92,10 +94,14 @@ define("@modules/general-content", ["require", "exports", "@ijstech/components",
         async edit() {
             if (this.data != undefined)
                 this.tempData = this.deepCopyGeneralContentData(this.data);
+            else {
+                console.log("data is undefined");
+            }
             this.editPage.visible = true;
             this.viewPage.visible = true;
             this.editPage.width = "40%";
             this.viewPage.width = "60%";
+            this.renderPreview();
         }
         async confirm() {
             this.setData(this.tempData);
@@ -103,21 +109,73 @@ define("@modules/general-content", ["require", "exports", "@ijstech/components",
             this.viewPage.visible = true;
             this.editPage.width = "0%";
             this.viewPage.width = "100%";
+            this.renderPreview();
+            console.log(this.data);
         }
         async discard() {
             if (this.data != undefined)
                 this.tempData = this.deepCopyGeneralContentData(this.data);
+            else {
+                console.log("data is undefined");
+            }
             this.editPage.visible = false;
             this.viewPage.visible = true;
             this.editPage.width = "0%";
             this.viewPage.width = "100%";
+            this.removeUnsavedVStack();
+            this.renderPreview();
+        }
+        removeUnsavedVStack() {
+            let savedVStack = this.tempData.contentList.map(e => e.contentId);
+            let vStackList = document.getElementsByClassName("configVstack");
+            for (let i = 0; i < vStackList.length; i++) {
+                if (!(savedVStack.includes(vStackList[i].id))) {
+                    vStackList[i].parentNode.removeChild(vStackList[i]);
+                }
+            }
         }
         deepCopyGeneralContentData(toBeCopied) {
-            let newList;
+            console.log("deepCopyGeneralContentData, toBeCopied: ", toBeCopied);
+            let newList = {
+                title: {
+                    titleContent: toBeCopied.title.titleContent,
+                    titleFontsize: toBeCopied.title.titleFontsize,
+                    titleFontColor: toBeCopied.title.titleFontColor,
+                    titleAlignment: toBeCopied.title.titleAlignment,
+                },
+                contentList: []
+            };
             for (let i = 0; i < toBeCopied.contentList.length; i++) {
-                newList.contentList.push(toBeCopied.contentList[i]);
+                if (toBeCopied.contentList[i].type == "paragraph") {
+                    newList.contentList.push({
+                        contentId: toBeCopied.contentList[i].contentId,
+                        type: toBeCopied.contentList[i].type,
+                        content: {
+                            paraContent: toBeCopied.contentList[i].content.paraContent,
+                            paraFontsize: toBeCopied.contentList[i].content.paraFontsize,
+                            paraFontColor: toBeCopied.contentList[i].content.paraFontColor,
+                            paraAlignment: toBeCopied.contentList[i].content.paraAlignment
+                        }
+                    });
+                }
+                else if (toBeCopied.contentList[i].type == "button") {
+                    newList.contentList.push({
+                        contentId: toBeCopied.contentList[i].contentId,
+                        type: toBeCopied.contentList[i].type,
+                        content: {
+                            btnTxt: toBeCopied.contentList[i].content.btnTxt,
+                            btnTxtColor: toBeCopied.contentList[i].content.btnTxtColor,
+                            btnTxtFontSize: toBeCopied.contentList[i].content.btnTxtFontSize,
+                            btnBGColor: toBeCopied.contentList[i].content.btnBGColor,
+                            btnAlignment: toBeCopied.contentList[i].content.btnAlignment,
+                            btnLink: toBeCopied.contentList[i].content.btnLink,
+                        }
+                    });
+                }
+                else {
+                    console.log("Content type does not exist");
+                }
             }
-            newList.title = toBeCopied.title;
             return newList;
         }
         handleTitleCaptionChange() {
@@ -207,7 +265,7 @@ define("@modules/general-content", ["require", "exports", "@ijstech/components",
                 type: "paragraph",
                 contentId: newContentId
             });
-            this.content.append(this.$render("i-vstack", { id: `vstack_${newContentId}`, width: "100%", background: { color: '#aba6a6' }, margin: { top: '10px' }, padding: { top: '0.5rem', bottom: "0.5rem", left: "0.5rem", right: "0.5rem" }, gap: "10px" },
+            this.content.append(this.$render("i-vstack", { id: `vstack_${newContentId}`, class: "configVstack", width: "100%", background: { color: '#aba6a6' }, margin: { top: '10px' }, padding: { top: '0.5rem', bottom: "0.5rem", left: "0.5rem", right: "0.5rem" }, gap: "10px" },
                 this.$render("i-hstack", { width: "100%", justifyContent: 'space-between', verticalAlignment: 'center' },
                     this.$render("i-label", { caption: `Content ${parseInt(newContentId) + 1}` }),
                     this.$render("i-button", { id: `removeBtn_${newContentId}`, caption: "remove", padding: { top: '0.5rem', bottom: '0.5rem', left: '1rem', right: '1rem' }, onClick: (value) => this.removeAContent(value) })),
@@ -238,7 +296,7 @@ define("@modules/general-content", ["require", "exports", "@ijstech/components",
                 type: "button",
                 contentId: newContentId
             });
-            this.content.append(this.$render("i-vstack", { id: `vstack_${newContentId}`, width: "100%", background: { color: '#aba6a6' }, margin: { top: '10px' }, padding: { top: '0.5rem', bottom: "0.5rem", left: "0.5rem", right: "0.5rem" }, gap: "10px" },
+            this.content.append(this.$render("i-vstack", { id: `vstack_${newContentId}`, class: "configVstack", width: "100%", background: { color: '#aba6a6' }, margin: { top: '10px' }, padding: { top: '0.5rem', bottom: "0.5rem", left: "0.5rem", right: "0.5rem" }, gap: "10px" },
                 this.$render("i-hstack", { width: "100%", justifyContent: 'space-between', verticalAlignment: 'center' },
                     this.$render("i-label", { caption: `Content ${parseInt(newContentId) + 1}` }),
                     this.$render("i-button", { id: `removeBtn_${newContentId}`, caption: "remove", padding: { top: '0.5rem', bottom: '0.5rem', left: '1rem', right: '1rem' }, onClick: (value) => this.removeAContent(value) })),
