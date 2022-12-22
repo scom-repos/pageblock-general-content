@@ -22,6 +22,19 @@ Styles.cssRule('#mainPnl', {
         '.textJustify': {
             textAlign: 'justify',
             overflowWrap: 'break-word'
+        },
+
+        'textarea': {
+            borderRadius: '10px'
+        },
+
+        'input': {
+            textAlign: 'center'
+        },
+
+        '.settingTxt': {
+            color: 'var(--colors-primary-main)',
+            fontSize: '20px',
         }
     }
 });
