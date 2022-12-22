@@ -4,12 +4,37 @@ const Theme = Styles.Theme.ThemeVars as any;
 
 Styles.cssRule('#mainPnl', {
     $nest: {
-        '.changePageBtn:hover': {
-            backgroundColor: 'black'
+        '.textCenter': {
+            textAlign: 'center',
+            overflowWrap: 'break-word'
         },
-        '.removeImg': {
-            visibility: 'visible',
-            zIndex: 10
+
+        '.textLeft': {
+            textAlign: 'left',
+            overflowWrap: 'break-word'
+        },
+
+        '.textRight': {
+            textAlign: 'right',
+            overflowWrap: 'break-word'
+        },
+
+        '.textJustify': {
+            textAlign: 'justify',
+            overflowWrap: 'break-word'
+        },
+
+        'textarea': {
+            borderRadius: '10px'
+        },
+
+        'input': {
+            textAlign: 'center'
+        },
+
+        '.settingTxt': {
+            color: 'var(--colors-primary-main)',
+            fontSize: '20px',
         }
     }
 });
