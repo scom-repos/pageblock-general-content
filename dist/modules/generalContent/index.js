@@ -51,8 +51,7 @@ define("@modules/general-content", ["require", "exports", "@ijstech/components",
             super(...arguments);
             this.maxContentId = -1;
             this.alignmentChoices = [
-                { value: "textLeft", label: "left" }, { value: "textRight", label: "right" },
-                { value: "textCenter", label: "center" }, { value: "textJustify", label: "justify" }
+                { value: "textLeft", label: "left" }, { value: "textRight", label: "right" }, { value: "textCenter", label: "center" }
             ];
             this.tag = {};
             this.defaultEdit = true;
@@ -285,7 +284,7 @@ define("@modules/general-content", ["require", "exports", "@ijstech/components",
                     paraContent: 'new paragraph',
                     paraFontsize: '15px',
                     paraFontColor: '#000000',
-                    paraAlignment: 'start'
+                    paraAlignment: 'textLeft'
                 },
                 type: "paragraph",
                 contentId: newContentId
@@ -302,7 +301,7 @@ define("@modules/general-content", ["require", "exports", "@ijstech/components",
                     btnTxtColor: '#000000',
                     btnTxtFontSize: '13',
                     btnBGColor: "var(--colors-primary-main)",
-                    btnAlignment: "center",
+                    btnAlignment: "textCenter",
                     btnLink: ""
                 },
                 type: "button",
@@ -351,7 +350,7 @@ define("@modules/general-content", ["require", "exports", "@ijstech/components",
                         this.$render("i-hstack", { width: "100%", gap: "10px" },
                             this.$render("i-hstack", { width: "50%", gap: "10px" },
                                 this.$render("i-label", { caption: "Alignment" }),
-                                this.$render("i-input", { id: `BAlignment_${contentId}`, items: this.alignmentChoices, inputType: "combobox", selectedItem: this.getAlignmentChoicesByLabel((this.tempData.contentList[i].content).btnAlignment, 0), onChanged: (value) => this.handleContentAlignmentChange(value, "b") })),
+                                this.$render("i-input", { id: `BAlignment_${contentId}`, items: this.alignmentChoices, inputType: "combobox", selectedItem: this.getAlignmentChoicesByLabel((this.tempData.contentList[i].content).btnAlignment, 2), onChanged: (value) => this.handleContentAlignmentChange(value, "b") })),
                             this.$render("i-hstack", { width: "50%", gap: "10px" },
                                 this.$render("i-label", { caption: "Font size" }),
                                 this.$render("i-input", { id: `BFontSize_${contentId}`, inputType: "number", width: "70px", border: { radius: '10px' }, value: parseInt(this.tempData.contentList[i].content.btnTxtFontSize.replace("px", "")), onChanged: (value) => this.handleContentFontSizeChange(value, "b") }))),
@@ -388,7 +387,8 @@ define("@modules/general-content", ["require", "exports", "@ijstech/components",
                 }
                 else if (this.tempData.contentList[i].type == "button") {
                     let btnData = this.tempData.contentList[i].content;
-                    this.preview.append(this.$render("i-hstack", { width: "100%", horizontalAlignment: btnData.btnAlignment, margin: { top: '10px', bottom: '10px' } },
+                    console.log(this.getAlignmentLabelByValue(btnData.btnAlignment));
+                    this.preview.append(this.$render("i-hstack", { width: "100%", horizontalAlignment: this.getAlignmentLabelByValue(btnData.btnAlignment), margin: { top: '10px', bottom: '10px' } },
                         this.$render("i-button", { id: `btnLink_${this.tempData.contentList[i].contentId}`, padding: { left: '1rem', right: '1rem', top: '0.5rem', bottom: '0.5rem' }, caption: btnData.btnTxt, font: { color: btnData.btnTxtColor, size: btnData.btnTxtFontSize }, background: { color: btnData.btnBGColor }, onClick: (value) => this.handleClickBtn(value) })));
                 }
                 else {
@@ -399,6 +399,23 @@ define("@modules/general-content", ["require", "exports", "@ijstech/components",
         getAlignmentChoicesByLabel(alignType, defaultIndex) {
             let alignment = this.alignmentChoices.find(e => e.label == alignType) || this.alignmentChoices[defaultIndex];
             return alignment;
+        }
+        getAlignmentLabelByValue(align) {
+            console.log(align);
+            let alignment = this.alignmentChoices.find(e => e.value == align) || this.alignmentChoices[0];
+            console.log(alignment);
+            if (alignment.label == 'left') {
+                return "start";
+            }
+            else if (alignment.label == 'right') {
+                return "end";
+            }
+            else if (alignment.label == 'center') {
+                return "center";
+            }
+            else {
+                console.log("Alignment type does not exist");
+            }
         }
         initTitleSetting() {
             this.titleSetting.append(this.$render("i-vstack", { width: "100%", gap: "10px" },

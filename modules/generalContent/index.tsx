@@ -68,8 +68,7 @@ export default class GeneralContent extends Module implements PageBlock {
     private maxContentId = -1;
     private tempData: GeneralContentData;
     private alignmentChoices: IComboItem[] = [
-        { value: "textLeft", label: "left" }, { value: "textRight", label: "right" },
-        { value: "textCenter", label: "center" }, { value: "textJustify", label: "justify" }
+        { value: "textLeft", label: "left" }, { value: "textRight", label: "right" }, { value: "textCenter", label: "center" }
     ];
 
     tag: any = {};
@@ -326,7 +325,7 @@ export default class GeneralContent extends Module implements PageBlock {
                 paraContent: 'new paragraph',
                 paraFontsize: '15px',
                 paraFontColor: '#000000',
-                paraAlignment: 'start'
+                paraAlignment: 'textLeft'
             } as ParagraphData,
             type: "paragraph",
             contentId: newContentId
@@ -344,7 +343,7 @@ export default class GeneralContent extends Module implements PageBlock {
                 btnTxtColor: '#000000',
                 btnTxtFontSize: '13',
                 btnBGColor: "var(--colors-primary-main)",
-                btnAlignment: "center",
+                btnAlignment: "textCenter",
                 btnLink: ""
             } as ButtonData,
             type: "button",
@@ -435,7 +434,7 @@ export default class GeneralContent extends Module implements PageBlock {
                             <i-hstack width={"50%"} gap={"10px"}>
                                 <i-label caption="Alignment"></i-label>
                                 <i-input id={`BAlignment_${contentId}`} items={this.alignmentChoices} inputType="combobox"
-                                    selectedItem={this.getAlignmentChoicesByLabel(((this.tempData.contentList[i].content) as ButtonData).btnAlignment, 0)}
+                                    selectedItem={this.getAlignmentChoicesByLabel(((this.tempData.contentList[i].content) as ButtonData).btnAlignment, 2)}
                                     onChanged={(value) => this.handleContentAlignmentChange(value, "b")} ></i-input>
                             </i-hstack>
                             <i-hstack width={"50%"} gap={"10px"}>
@@ -497,8 +496,9 @@ export default class GeneralContent extends Module implements PageBlock {
 
             } else if (this.tempData.contentList[i].type == "button") {
                 let btnData = this.tempData.contentList[i].content as ButtonData
+                console.log(this.getAlignmentLabelByValue(btnData.btnAlignment));
                 this.preview.append(
-                    <i-hstack width="100%" horizontalAlignment={btnData.btnAlignment as any} margin={{ top: '10px', bottom: '10px' }}>
+                    <i-hstack width="100%" horizontalAlignment={this.getAlignmentLabelByValue(btnData.btnAlignment) as any} margin={{ top: '10px', bottom: '10px' }}>
                         <i-button id={`btnLink_${this.tempData.contentList[i].contentId}`}
                             padding={{ left: '1rem', right: '1rem', top: '0.5rem', bottom: '0.5rem' }}
                             caption={btnData.btnTxt} font={{ color: btnData.btnTxtColor, size: btnData.btnTxtFontSize }}
@@ -514,6 +514,21 @@ export default class GeneralContent extends Module implements PageBlock {
     private getAlignmentChoicesByLabel(alignType: string, defaultIndex: number) {
         let alignment = this.alignmentChoices.find(e => e.label == alignType) || this.alignmentChoices[defaultIndex]
         return alignment;
+    }
+
+    private getAlignmentLabelByValue(align: string) {
+        console.log(align)
+        let alignment = this.alignmentChoices.find(e => e.value == align) || this.alignmentChoices[0]
+        console.log(alignment)
+        if (alignment.label == 'left') {
+            return "start"
+        } else if (alignment.label == 'right') {
+            return "end"
+        } else if  (alignment.label == 'center') {
+            return "center"
+        } else {
+            console.log("Alignment type does not exist")
+        }
     }
 
     private initTitleSetting() {
