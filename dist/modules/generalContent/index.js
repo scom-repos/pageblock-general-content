@@ -46,6 +46,7 @@ define("@modules/general-content/generalContent.css.ts", ["require", "exports", 
 define("@modules/general-content", ["require", "exports", "@ijstech/components", "@modules/general-content/generalContent.css.ts"], function (require, exports, components_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    const Theme = components_2.Styles.Theme.ThemeVars;
     let GeneralContent = class GeneralContent extends components_2.Module {
         constructor() {
             super(...arguments);
@@ -67,7 +68,9 @@ define("@modules/general-content", ["require", "exports", "@ijstech/components",
                     titleContent: 'New title',
                     titleFontsize: '25px',
                     titleFontColor: '#000000',
-                    titleAlignment: 'textCenter'
+                    titleAlignment: 'textCenter',
+                    titleBold: true,
+                    titleDivider: true
                 },
                 contentList: []
             };
@@ -152,6 +155,8 @@ define("@modules/general-content", ["require", "exports", "@ijstech/components",
                     titleFontsize: toBeCopied.title.titleFontsize,
                     titleFontColor: toBeCopied.title.titleFontColor,
                     titleAlignment: toBeCopied.title.titleAlignment,
+                    titleBold: toBeCopied.title.titleBold,
+                    titleDivider: toBeCopied.title.titleDivider
                 },
                 contentList: []
             };
@@ -221,6 +226,7 @@ define("@modules/general-content", ["require", "exports", "@ijstech/components",
         }
         handleContentAlignmentChange(value, type) {
             try {
+                console.log("Input box: ", value);
                 let index = this.tempData.contentList.findIndex(e => e.contentId == value.parentNode.id.split("_")[1]); // workaround
                 if (type == "p") {
                     this.tempData.contentList[index].content.paraAlignment = value.value.value;
@@ -374,7 +380,12 @@ define("@modules/general-content", ["require", "exports", "@ijstech/components",
             text.innerHTML = this.tempData.title.titleContent;
             text.style.fontSize = this.tempData.title.titleFontsize;
             text.style.color = this.tempData.title.titleFontColor;
+            text.style.fontWeight = (this.tempData.title.titleBold) ? "bold" : "normal";
+            text.style.marginBottom = "0.5rem";
             this.preview.append(text);
+            if (this.tempData.title.titleDivider) {
+                this.preview.append(this.$render("i-panel", { height: 2, visible: this.tempData.title.titleDivider || false, width: 200, maxWidth: '100%', margin: { bottom: 8, left: 'auto', right: 'auto' }, background: { color: Theme.colors.primary.main } }));
+            }
             // render preview title
             for (let i = 0; i < this.tempData.contentList.length; i++) {
                 if (this.tempData.contentList[i].type == "paragraph") {
@@ -387,7 +398,6 @@ define("@modules/general-content", ["require", "exports", "@ijstech/components",
                 }
                 else if (this.tempData.contentList[i].type == "button") {
                     let btnData = this.tempData.contentList[i].content;
-                    console.log(this.getAlignmentLabelByValue(btnData.btnAlignment));
                     this.preview.append(this.$render("i-hstack", { width: "100%", horizontalAlignment: this.getAlignmentLabelByValue(btnData.btnAlignment), margin: { top: '10px', bottom: '10px' } },
                         this.$render("i-button", { id: `btnLink_${this.tempData.contentList[i].contentId}`, padding: { left: '1rem', right: '1rem', top: '0.5rem', bottom: '0.5rem' }, caption: btnData.btnTxt, font: { color: btnData.btnTxtColor, size: btnData.btnTxtFontSize }, background: { color: btnData.btnBGColor }, onClick: (value) => this.handleClickBtn(value) })));
                 }
@@ -401,9 +411,7 @@ define("@modules/general-content", ["require", "exports", "@ijstech/components",
             return alignment;
         }
         getAlignmentLabelByValue(align) {
-            console.log(align);
             let alignment = this.alignmentChoices.find(e => e.value == align) || this.alignmentChoices[0];
-            console.log(alignment);
             if (alignment.label == 'left') {
                 return "start";
             }
@@ -417,11 +425,22 @@ define("@modules/general-content", ["require", "exports", "@ijstech/components",
                 console.log("Alignment type does not exist");
             }
         }
+        handleTitleBoldChange(value) {
+            this.tempData.title.titleBold = value.checked;
+            this.renderPreview();
+        }
+        handleTitleDividerChange(value) {
+            this.tempData.title.titleDivider = value.checked;
+            this.renderPreview();
+        }
         initTitleSetting() {
             this.titleSetting.append(this.$render("i-vstack", { width: "100%", gap: "10px" },
-                this.$render("i-hstack", { width: "100%", gap: "10px" },
-                    this.$render("i-label", { caption: "Color" }),
-                    this.$render("i-input", { id: "titleColorPicker", value: this.tempData.title.titleFontColor, inputType: 'color', onChanged: (value) => this.handleTitleColorChange(value) })),
+                this.$render("i-hstack", { width: "100%", gap: "10px", verticalAlignment: "center", justifyContent: "space-between" },
+                    this.$render("i-hstack", { gap: "10px" },
+                        this.$render("i-label", { caption: "Color" }),
+                        this.$render("i-input", { id: "titleColorPicker", value: this.tempData.title.titleFontColor, inputType: 'color', onChanged: (value) => this.handleTitleColorChange(value) })),
+                    this.$render("i-input", { id: "titleBoldInput", inputType: 'checkbox', checked: true, caption: "Bold", onChanged: (value) => this.handleTitleBoldChange(value) }),
+                    this.$render("i-input", { id: "titleDividerInput", inputType: 'checkbox', checked: true, caption: "Divider", onChanged: (value) => this.handleTitleDividerChange(value) })),
                 this.$render("i-hstack", { width: "100%", gap: "10px" },
                     this.$render("i-hstack", { width: "50%", gap: "10px" },
                         this.$render("i-label", { caption: "Alignment" }),

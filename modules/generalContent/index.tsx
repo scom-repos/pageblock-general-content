@@ -2,6 +2,8 @@ import { Module, customElements, Styles, Container, customModule, application, I
 import { PageBlock } from "./pageBlock.interface";
 import './generalContent.css';
 
+const Theme = Styles.Theme.ThemeVars;
+
 declare global {
     namespace JSX {
         interface IntrinsicElements {
@@ -18,7 +20,9 @@ interface GeneralContentData {
         titleContent: string,
         titleFontsize: string,
         titleFontColor: string,
-        titleAlignment: string
+        titleAlignment: string,
+        titleBold: boolean,
+        titleDivider: boolean
     },
     contentList: ContentData[]
 }
@@ -64,6 +68,7 @@ export default class GeneralContent extends Module implements PageBlock {
     private previewTxt: Label;
     private titleSetting: VStack;
     private noContent: Label;
+    private titleBoldInput: Input;
 
     private maxContentId = -1;
     private tempData: GeneralContentData;
@@ -89,7 +94,9 @@ export default class GeneralContent extends Module implements PageBlock {
                 titleContent: 'New title',
                 titleFontsize: '25px',
                 titleFontColor: '#000000',
-                titleAlignment: 'textCenter'
+                titleAlignment: 'textCenter',
+                titleBold: true,
+                titleDivider: true
             },
             contentList: []
         }
@@ -185,6 +192,8 @@ export default class GeneralContent extends Module implements PageBlock {
                 titleFontsize: toBeCopied.title.titleFontsize,
                 titleFontColor: toBeCopied.title.titleFontColor,
                 titleAlignment: toBeCopied.title.titleAlignment,
+                titleBold: toBeCopied.title.titleBold,
+                titleDivider: toBeCopied.title.titleDivider
             },
             contentList: []
         }
@@ -257,6 +266,7 @@ export default class GeneralContent extends Module implements PageBlock {
 
     private handleContentAlignmentChange(value: any, type: string) {
         try {
+            console.log("Input box: ", value);
             let index = this.tempData.contentList.findIndex(e => e.contentId == value.parentNode.id.split("_")[1]) // workaround
             if (type == "p") {
                 (this.tempData.contentList[index].content as ParagraphData).paraAlignment = value.value.value;
@@ -437,6 +447,7 @@ export default class GeneralContent extends Module implements PageBlock {
                                     selectedItem={this.getAlignmentChoicesByLabel(((this.tempData.contentList[i].content) as ButtonData).btnAlignment, 2)}
                                     onChanged={(value) => this.handleContentAlignmentChange(value, "b")} ></i-input>
                             </i-hstack>
+
                             <i-hstack width={"50%"} gap={"10px"}>
                                 <i-label caption="Font size"></i-label>
                                 <i-input id={`BFontSize_${contentId}`} inputType="number" width="70px" border={{ radius: '10px' }}
@@ -480,8 +491,17 @@ export default class GeneralContent extends Module implements PageBlock {
         text.innerHTML = this.tempData.title.titleContent
         text.style.fontSize = this.tempData.title.titleFontsize
         text.style.color = this.tempData.title.titleFontColor
+        text.style.fontWeight = (this.tempData.title.titleBold) ? "bold" : "normal";
+        text.style.marginBottom = "0.5rem";
 
         this.preview.append(text)
+
+        if (this.tempData.title.titleDivider) {
+            this.preview.append(
+                <i-panel height={2} visible={this.tempData.title.titleDivider || false} width={200} maxWidth='100%'
+                    margin={{ bottom: 8, left: 'auto', right: 'auto' }} background={{ color: Theme.colors.primary.main }}></i-panel>
+            )
+        }
 
         // render preview title
         for (let i = 0; i < this.tempData.contentList.length; i++) {
@@ -496,7 +516,6 @@ export default class GeneralContent extends Module implements PageBlock {
 
             } else if (this.tempData.contentList[i].type == "button") {
                 let btnData = this.tempData.contentList[i].content as ButtonData
-                console.log(this.getAlignmentLabelByValue(btnData.btnAlignment));
                 this.preview.append(
                     <i-hstack width="100%" horizontalAlignment={this.getAlignmentLabelByValue(btnData.btnAlignment) as any} margin={{ top: '10px', bottom: '10px' }}>
                         <i-button id={`btnLink_${this.tempData.contentList[i].contentId}`}
@@ -517,27 +536,45 @@ export default class GeneralContent extends Module implements PageBlock {
     }
 
     private getAlignmentLabelByValue(align: string) {
-        console.log(align)
         let alignment = this.alignmentChoices.find(e => e.value == align) || this.alignmentChoices[0]
-        console.log(alignment)
         if (alignment.label == 'left') {
             return "start"
         } else if (alignment.label == 'right') {
             return "end"
-        } else if  (alignment.label == 'center') {
+        } else if (alignment.label == 'center') {
             return "center"
         } else {
             console.log("Alignment type does not exist")
         }
     }
 
+    private handleTitleBoldChange(value: any) {
+        this.tempData.title.titleBold = value.checked;
+        this.renderPreview();
+    }
+
+    private handleTitleDividerChange(value: any) {
+        this.tempData.title.titleDivider = value.checked;
+        this.renderPreview();
+    }
+
     private initTitleSetting() {
         this.titleSetting.append(
             <i-vstack width={"100%"} gap="10px">
-                <i-hstack width={"100%"} gap={"10px"}>
-                    <i-label caption="Color"></i-label>
-                    <i-input id="titleColorPicker" value={this.tempData.title.titleFontColor} inputType='color'
-                        onChanged={(value) => this.handleTitleColorChange(value)}></i-input>
+
+                <i-hstack width={"100%"} gap={"10px"} verticalAlignment={"center"} justifyContent="space-between">
+                    <i-hstack gap={"10px"}>
+                        <i-label caption="Color"></i-label>
+                        <i-input id="titleColorPicker" value={this.tempData.title.titleFontColor} inputType='color'
+                            onChanged={(value) => this.handleTitleColorChange(value)}></i-input>
+                    </i-hstack>
+
+                    <i-input id="titleBoldInput" inputType='checkbox' checked={true} caption="Bold"
+                        onChanged={(value) => this.handleTitleBoldChange(value)}></i-input>
+
+                    <i-input id="titleDividerInput" inputType='checkbox' checked={true} caption={"Divider"}
+                        onChanged={(value) => this.handleTitleDividerChange(value)}></i-input>
+
                 </i-hstack>
 
                 <i-hstack width={"100%"} gap={"10px"}>
