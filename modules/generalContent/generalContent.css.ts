@@ -43,21 +43,35 @@ Styles.cssRule('#mainPnl', {
             marginBottom: '20px',
         },
 
-        'i-input textarea': {
+        '.caption textarea': {
             width: '100% !important',
             padding: "7px"
+        },
+
+        '.shortInput textarea': {
+            width: '100% !important',
         },
 
         'i-input i-combo-box': {
             width: '100% !important'
         },
 
-        '.fontSizeInput input': {
+        '.shortInput input': {
             padding: "7px"
         },
 
-        '.checkboxHstack': {
-            justifyContent: "space-evenly"
+        '.scrollable': {
+            minHeight: "500px",
+            overflowY: "scroll"
+        },
+
+        '#preview': {
+            display: 'block',
+            overflow: 'auto'
         }
+
+        // '.spaceEvenly': {
+        //     justifyContent: "space-evenly"
+        // }
     }
 });
