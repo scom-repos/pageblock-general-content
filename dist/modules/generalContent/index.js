@@ -14,6 +14,10 @@ define("@modules/general-content/generalContent.css.ts", ["require", "exports", 
     const Theme = components_1.Styles.Theme.ThemeVars;
     components_1.Styles.cssRule('#mainPnl', {
         $nest: {
+            '#editPage *': {
+                fontSize: '13px',
+                color: '#676a6c'
+            },
             '.textCenter': {
                 textAlign: 'center',
                 overflowWrap: 'break-word'
@@ -26,20 +30,46 @@ define("@modules/general-content/generalContent.css.ts", ["require", "exports", 
                 textAlign: 'right',
                 overflowWrap: 'break-word'
             },
-            '.textJustify': {
-                textAlign: 'justify',
-                overflowWrap: 'break-word'
-            },
-            'textarea': {
-                borderRadius: '10px'
-            },
-            'input': {
-                textAlign: 'center'
-            },
             '.settingTxt': {
                 color: 'var(--colors-primary-main)',
                 fontSize: '20px',
+            },
+            '.listDivider': {
+                borderTop: '1px dashed #e7eaec',
+                height: '1px',
+                width: '100%',
+                margin: '20px 0',
+            },
+            '.titleDivider': {
+                borderTop: '1px solid #e7eaec',
+                height: '1px',
+                width: '100%',
+                marginBottom: '20px',
+            },
+            '.caption textarea': {
+                width: '100% !important',
+                padding: "7px"
+            },
+            '.shortInput textarea': {
+                width: '100% !important',
+            },
+            'i-input i-combo-box': {
+                width: '100% !important'
+            },
+            '.shortInput input': {
+                padding: "7px"
+            },
+            '.scrollable': {
+                minHeight: "500px",
+                overflowY: "scroll"
+            },
+            '#preview': {
+                display: 'block',
+                overflow: 'auto'
             }
+            // '.spaceEvenly': {
+            //     justifyContent: "space-evenly"
+            // }
         }
     });
 });
@@ -133,8 +163,8 @@ define("@modules/general-content", ["require", "exports", "@ijstech/components",
             if (sceneName == "editor") {
                 this.editPage.visible = true;
                 this.viewPage.visible = true;
-                this.editPage.width = "40%";
-                this.viewPage.width = "60%";
+                this.editPage.width = "50%";
+                this.viewPage.width = "50%";
                 this.previewTxt.visible = true;
             }
             else if (sceneName == "viewer") {
@@ -281,6 +311,7 @@ define("@modules/general-content", ["require", "exports", "@ijstech/components",
             this.tempData.contentList = this.tempData.contentList.filter(e => e.contentId !== value.id.split("_")[1]);
             this.setNoContent();
             this.renderPreview();
+            this.renderConfig();
         }
         addParagraph() {
             this.maxContentId = this.maxContentId + 1;
@@ -323,53 +354,73 @@ define("@modules/general-content", ["require", "exports", "@ijstech/components",
         renderConfig() {
             this.content.clearInnerHTML();
             this.setNoContent();
+            let txtContent = 0, btnContent = 0;
             for (let i = 0; i < this.tempData.contentList.length; i++) {
                 if (this.tempData.contentList[i].type == "paragraph") {
+                    txtContent++;
                     let contentId = this.tempData.contentList[i].contentId;
-                    this.content.append(this.$render("i-vstack", { id: `vstack_${contentId}`, class: "configVstack", width: "100%", background: { color: '#ffe6d5' }, margin: { bottom: '10px' }, border: { radius: '10px' }, padding: { top: '1rem', bottom: "1rem", left: "1rem", right: "1rem" }, gap: "10px" },
-                        this.$render("i-hstack", { width: "100%", justifyContent: 'space-between', verticalAlignment: 'center' },
-                            this.$render("i-hstack", { gap: "10px" },
-                                this.$render("i-label", { caption: "Color" }),
-                                this.$render("i-input", { id: `Pcolor_${contentId}`, inputType: 'color', value: this.tempData.contentList[i].content.paraFontColor, onChanged: (value) => this.handleContentColorChange(value, "p") })),
-                            this.$render("i-icon", { id: `removeBtn_${contentId}`, name: 'times-circle', fill: 'black', width: "25px", height: "25px", class: "pointer", onClick: (value) => this.removeAContent(value) })),
-                        this.$render("i-hstack", { width: "100%", gap: "10px" },
-                            this.$render("i-hstack", { width: "50%", gap: "10px" },
-                                this.$render("i-label", { caption: "Alignment" }),
-                                this.$render("i-input", { id: `Palign_${contentId}`, items: this.alignmentChoices, inputType: "combobox", selectedItem: this.getAlignmentChoicesByLabel((this.tempData.contentList[i].content).paraAlignment, 0), onChanged: (value) => this.handleContentAlignmentChange(value, "p") })),
-                            this.$render("i-hstack", { width: "50%", gap: "10px" },
-                                this.$render("i-label", { caption: "Font size" }),
-                                this.$render("i-input", { id: `PfontSize_${contentId}`, inputType: "number", width: "70px", border: { radius: '10px' }, value: parseInt(this.tempData.contentList[i].content.paraFontsize.replace("px", "")), onChanged: (value) => this.handleContentFontSizeChange(value, "p") }))),
-                        this.$render("i-label", { caption: "Caption" }),
-                        this.$render("i-input", { id: `Pcaption_${contentId}`, inputType: "textarea", placeholder: "Input the title here", width: '100%', height: "150px", value: this.tempData.contentList[i].content.paraContent, onChanged: (value) => this.handleContentCaptionChange(value, "p") })));
+                    this.content.append(this.$render("i-vstack", { id: `vstack_${contentId}`, width: "100%", background: { color: '#ffffff' }, margin: { bottom: "20px" } },
+                        this.$render("i-hstack", { width: "100%", verticalAlignment: 'center', margin: { top: 20, bottom: 20 }, padding: { left: 15, right: 15 }, justifyContent: "space-between" },
+                            this.$render("i-label", { caption: `Text Content ${txtContent}`, font: { size: '14px', bold: true } }),
+                            this.$render("i-icon", { id: `removeBtn_${contentId}`, name: 'times', fill: 'black', width: "20px", height: "20px", class: "pointer", onClick: (value) => this.removeAContent(value) })),
+                        this.$render("i-panel", { class: "titleDivider" }),
+                        this.$render("i-vstack", { width: "100%", padding: { left: 15, right: 15, bottom: 15 } },
+                            this.$render("i-hstack", { width: "100%", verticalAlignment: 'center' },
+                                this.$render("i-label", { caption: "Color", width: "30%" }),
+                                this.$render("i-input", { id: `Pcolor_${contentId}`, width: "70%", inputType: 'color', value: this.tempData.contentList[i].content.paraFontColor, onChanged: (value) => this.handleContentColorChange(value, "p") })),
+                            this.$render("i-panel", { class: "listDivider" }),
+                            this.$render("i-hstack", { width: "100%", verticalAlignment: 'center' },
+                                this.$render("i-label", { caption: "Alignment", width: "30%" }),
+                                this.$render("i-input", { id: `Palign_${contentId}`, width: "70%", items: this.alignmentChoices, inputType: "combobox", icon: { name: "angle-down" }, selectedItem: this.getAlignmentChoicesByLabel((this.tempData.contentList[i].content).paraAlignment, 0), onChanged: (value) => this.handleContentAlignmentChange(value, "p") })),
+                            this.$render("i-panel", { class: "listDivider" }),
+                            this.$render("i-hstack", { width: "100%", verticalAlignment: 'center' },
+                                this.$render("i-label", { caption: "Font size", width: "30%" }),
+                                this.$render("i-input", { id: `PfontSize_${contentId}`, inputType: "number", width: "70%", class: "shortInput", value: parseInt(this.tempData.contentList[i].content.paraFontsize.replace("px", "")), onChanged: (value) => this.handleContentFontSizeChange(value, "p") })),
+                            this.$render("i-panel", { class: "listDivider" }),
+                            this.$render("i-hstack", { width: "100%", verticalAlignment: 'center' },
+                                this.$render("i-label", { caption: "Caption", width: "30%" }),
+                                this.$render("i-input", { id: `Pcaption_${contentId}`, inputType: "textarea", placeholder: "Input the title here", class: "caption", width: '70%', height: "150px", value: this.tempData.contentList[i].content.paraContent, onChanged: (value) => this.handleContentCaptionChange(value, "p") })))));
                 }
                 else if (this.tempData.contentList[i].type == "button") {
+                    btnContent++;
                     let contentId = this.tempData.contentList[i].contentId;
-                    this.content.append(this.$render("i-vstack", { id: `vstack_${contentId}`, class: "configVstack", width: "100%", background: { color: '#ffe6d5' }, margin: { bottom: '10px' }, border: { radius: '10px' }, padding: { top: '1rem', bottom: "1rem", left: "1rem", right: "1rem" }, gap: "10px" },
-                        this.$render("i-hstack", { width: "100%", justifyContent: 'space-between', verticalAlignment: 'center' },
-                            this.$render("i-hstack", { gap: "10px" },
-                                this.$render("i-label", { caption: "Text color" }),
-                                this.$render("i-input", { id: `Bcolor_${contentId}`, inputType: 'color', value: this.tempData.contentList[i].content.btnTxtColor, onChanged: (value) => this.handleContentColorChange(value, "b") })),
-                            this.$render("i-icon", { id: `removeBtn_${contentId}`, name: 'times-circle', fill: 'black', width: "25px", height: "25px", class: "pointer", onClick: (value) => this.removeAContent(value) })),
-                        this.$render("i-hstack", { width: "100%", gap: "10px" },
-                            this.$render("i-label", { caption: "Background color" }),
-                            this.$render("i-input", { id: `BBGcolor_${contentId}`, inputType: 'color', value: this.tempData.contentList[i].content.btnBGColor, onChanged: (value) => this.handleButtonColorChange(value) })),
-                        this.$render("i-hstack", { width: "100%", gap: "10px" },
-                            this.$render("i-hstack", { width: "50%", gap: "10px" },
-                                this.$render("i-label", { caption: "Alignment" }),
-                                this.$render("i-input", { id: `BAlignment_${contentId}`, items: this.alignmentChoices, inputType: "combobox", selectedItem: this.getAlignmentChoicesByLabel((this.tempData.contentList[i].content).btnAlignment, 2), onChanged: (value) => this.handleContentAlignmentChange(value, "b") })),
-                            this.$render("i-hstack", { width: "50%", gap: "10px" },
-                                this.$render("i-label", { caption: "Font size" }),
-                                this.$render("i-input", { id: `BFontSize_${contentId}`, inputType: "number", width: "70px", border: { radius: '10px' }, value: parseInt(this.tempData.contentList[i].content.btnTxtFontSize.replace("px", "")), onChanged: (value) => this.handleContentFontSizeChange(value, "b") }))),
-                        this.$render("i-hstack", { width: "100%", gap: "5px", verticalAlignment: 'center' },
-                            this.$render("i-label", { caption: "Caption" }),
-                            this.$render("i-input", { id: `BCaption_${contentId}`, inputType: "textarea", margin: { left: '1rem' }, placeholder: "Input the title here", width: '100%', height: "30px", value: this.tempData.contentList[i].content.btnTxt, onChanged: (value) => this.handleContentCaptionChange(value, "b") })),
-                        this.$render("i-hstack", { width: "100%", gap: "5px", verticalAlignment: 'center' },
-                            this.$render("i-label", { caption: "Link" }),
-                            this.$render("i-input", { id: `BLink_${contentId}`, inputType: "textarea", margin: { left: '1rem' }, placeholder: "Input the link here", width: '100%', height: "30px", value: this.tempData.contentList[i].content.btnLink, onChanged: (value) => this.handleButtonLinkChange(value) }))));
+                    this.content.append(this.$render("i-vstack", { id: `vstack_${contentId}`, width: "100%", background: { color: '#ffffff' }, margin: { bottom: "20px" } },
+                        this.$render("i-hstack", { width: "100%", verticalAlignment: 'center', margin: { top: 20, bottom: 20 }, padding: { left: 15, right: 15 }, justifyContent: "space-between" },
+                            this.$render("i-label", { caption: `Button Content ${btnContent}`, font: { size: '14px', bold: true } }),
+                            this.$render("i-icon", { id: `removeBtn_${contentId}`, name: 'times', fill: 'black', width: "20px", height: "20px", class: "pointer", onClick: (value) => this.removeAContent(value) })),
+                        this.$render("i-panel", { class: "titleDivider" }),
+                        this.$render("i-vstack", { width: "100%", padding: { left: 15, right: 15, bottom: 15 } },
+                            this.$render("i-hstack", { width: "100%", verticalAlignment: 'center' },
+                                this.$render("i-label", { caption: "Text color", width: "30%" }),
+                                this.$render("i-input", { id: `Bcolor_${contentId}`, inputType: 'color', width: "70%", value: this.tempData.contentList[i].content.btnTxtColor, onChanged: (value) => this.handleContentColorChange(value, "b") })),
+                            this.$render("i-panel", { class: "listDivider" }),
+                            this.$render("i-hstack", { width: "100%", verticalAlignment: 'center' },
+                                this.$render("i-label", { caption: "Background color", width: "30%" }),
+                                this.$render("i-input", { id: `BBGcolor_${contentId}`, inputType: 'color', width: "70%", value: this.tempData.contentList[i].content.btnBGColor, onChanged: (value) => this.handleButtonColorChange(value) })),
+                            this.$render("i-panel", { class: "listDivider" }),
+                            this.$render("i-hstack", { width: "100%", verticalAlignment: 'center' },
+                                this.$render("i-label", { caption: "Alignment", width: "30%" }),
+                                this.$render("i-input", { id: `BAlignment_${contentId}`, items: this.alignmentChoices, inputType: "combobox", icon: { name: "angle-down" }, selectedItem: this.getAlignmentChoicesByLabel((this.tempData.contentList[i].content).btnAlignment, 2), width: "70%", onChanged: (value) => this.handleContentAlignmentChange(value, "b") })),
+                            this.$render("i-panel", { class: "listDivider" }),
+                            this.$render("i-hstack", { width: "100%", verticalAlignment: 'center' },
+                                this.$render("i-label", { caption: "Font size", width: "30%" }),
+                                this.$render("i-input", { id: `BFontSize_${contentId}`, inputType: "number", width: "70%", class: "shortInput", value: parseInt(this.tempData.contentList[i].content.btnTxtFontSize.replace("px", "")), onChanged: (value) => this.handleContentFontSizeChange(value, "b") })),
+                            this.$render("i-panel", { class: "listDivider" }),
+                            this.$render("i-hstack", { width: "100%", verticalAlignment: 'center' },
+                                this.$render("i-label", { caption: "Caption", width: "30%" }),
+                                this.$render("i-input", { id: `BCaption_${contentId}`, inputType: "textarea", placeholder: "Input the title here", width: '70%', class: "shortInput", value: this.tempData.contentList[i].content.btnTxt, onChanged: (value) => this.handleContentCaptionChange(value, "b") })),
+                            this.$render("i-panel", { class: "listDivider" }),
+                            this.$render("i-hstack", { width: "100%", verticalAlignment: 'center' },
+                                this.$render("i-label", { caption: "Link", width: "30%" }),
+                                this.$render("i-input", { id: `BLink_${contentId}`, inputType: "textarea", placeholder: "Input the link here", width: '70%', class: "shortInput", value: this.tempData.contentList[i].content.btnLink, onChanged: (value) => this.handleButtonLinkChange(value) })))));
                 }
                 else {
                     console.log("Content type does not exist");
                 }
+                // adjust config page height
+                // console.log(this.editPage.style.height, this.viewPage.style.height);
+                // this.editPage.style.height = this.viewPage.style.height;
+                // console.log(this.editPage.style.height, this.viewPage.style.height);
             }
         }
         renderPreview() {
@@ -382,6 +433,7 @@ define("@modules/general-content", ["require", "exports", "@ijstech/components",
             text.style.color = this.tempData.title.titleFontColor;
             text.style.fontWeight = (this.tempData.title.titleBold) ? "bold" : "normal";
             text.style.marginBottom = "0.5rem";
+            text.style.fontFamily = "";
             this.preview.append(text);
             if (this.tempData.title.titleDivider) {
                 this.preview.append(this.$render("i-panel", { height: 2, visible: this.tempData.title.titleDivider || false, width: 200, maxWidth: '100%', margin: { bottom: 8, left: 'auto', right: 'auto' }, background: { color: Theme.colors.primary.main } }));
@@ -405,6 +457,10 @@ define("@modules/general-content", ["require", "exports", "@ijstech/components",
                     console.log("Content type does not exist");
                 }
             }
+            // adjust config page height
+            // console.log(this.editPage.style.height, this.viewPage.style.height);
+            // this.editPage.style.height = this.viewPage.style.height;
+            // console.log(this.editPage.style.height, this.viewPage.style.height);
         }
         getAlignmentChoicesByLabel(alignType, defaultIndex) {
             let alignment = this.alignmentChoices.find(e => e.label == alignType) || this.alignmentChoices[defaultIndex];
@@ -434,39 +490,45 @@ define("@modules/general-content", ["require", "exports", "@ijstech/components",
             this.renderPreview();
         }
         initTitleSetting() {
-            this.titleSetting.append(this.$render("i-vstack", { width: "100%", gap: "10px" },
-                this.$render("i-hstack", { width: "100%", gap: "10px", verticalAlignment: "center", justifyContent: "space-between" },
-                    this.$render("i-hstack", { gap: "10px" },
-                        this.$render("i-label", { caption: "Color" }),
-                        this.$render("i-input", { id: "titleColorPicker", value: this.tempData.title.titleFontColor, inputType: 'color', onChanged: (value) => this.handleTitleColorChange(value) })),
-                    this.$render("i-input", { id: "titleBoldInput", inputType: 'checkbox', checked: true, caption: "Bold", onChanged: (value) => this.handleTitleBoldChange(value) }),
-                    this.$render("i-input", { id: "titleDividerInput", inputType: 'checkbox', checked: true, caption: "Divider", onChanged: (value) => this.handleTitleDividerChange(value) })),
-                this.$render("i-hstack", { width: "100%", gap: "10px" },
-                    this.$render("i-hstack", { width: "50%", gap: "10px" },
-                        this.$render("i-label", { caption: "Alignment" }),
-                        this.$render("i-input", { id: "titleAlignmentPicker", selectedItem: this.getAlignmentChoicesByLabel(this.tempData.title.titleAlignment, 2), items: this.alignmentChoices, inputType: "combobox", border: { radius: '10px' }, onChanged: (value) => this.handleTitleAlignmentChange(value) })),
-                    this.$render("i-hstack", { width: "50%", gap: "10px" },
-                        this.$render("i-label", { caption: "Font size" }),
-                        this.$render("i-input", { id: "titleFontSizeInput", value: parseInt(this.tempData.title.titleFontsize.replace("px", "")), inputType: "number", border: { radius: '10px' }, width: "70px", onChanged: (value) => this.handleTitleFontSizeChange(value) }))),
-                this.$render("i-label", { caption: "Caption" }),
-                this.$render("i-input", { id: 'titleInput', inputType: "textarea", placeholder: "Input the title here", value: this.tempData.title.titleContent, border: { radius: '10px' }, width: '100%', height: "150px", onChanged: (value) => this.handleTitleCaptionChange(value) })));
+            this.titleSetting.append(this.$render("i-vstack", { width: "100%", background: { color: '#ffffff' } },
+                this.$render("i-hstack", { width: "100%", verticalAlignment: 'center', margin: { top: 20, bottom: 20 }, padding: { left: 15, right: 15 } },
+                    this.$render("i-label", { caption: "Title Setting", font: { size: '14px', bold: true } })),
+                this.$render("i-panel", { class: "titleDivider" }),
+                this.$render("i-vstack", { width: "100%", padding: { left: 15, right: 15, bottom: 15 } },
+                    this.$render("i-hstack", { width: "100%", verticalAlignment: 'center' },
+                        this.$render("i-label", { caption: "Color", width: "30%" }),
+                        this.$render("i-input", { id: "titleColorPicker", width: "70%", value: this.tempData.title.titleFontColor, inputType: 'color', onChanged: (value) => this.handleTitleColorChange(value) })),
+                    this.$render("i-panel", { class: "listDivider" }),
+                    this.$render("i-hstack", { width: "100%", verticalAlignment: 'center' },
+                        this.$render("i-label", { caption: "Style", width: "30%" }),
+                        this.$render("i-vstack", { width: "70%", horizontalAlignment: 'start', gap: "10px" },
+                            this.$render("i-input", { id: "titleBoldInput", inputType: 'checkbox', checked: true, caption: "Bold", onChanged: (value) => this.handleTitleBoldChange(value) }),
+                            this.$render("i-input", { id: "titleDividerInput", inputType: 'checkbox', checked: true, caption: "Divider", onChanged: (value) => this.handleTitleDividerChange(value) }))),
+                    this.$render("i-panel", { class: "listDivider" }),
+                    this.$render("i-hstack", { width: "100%", verticalAlignment: 'center' },
+                        this.$render("i-label", { caption: "Alignment", width: "30%" }),
+                        this.$render("i-input", { id: "titleAlignmentPicker", width: "70%", selectedItem: this.getAlignmentChoicesByLabel(this.tempData.title.titleAlignment, 2), captionWidth: 0, caption: "", items: this.alignmentChoices, inputType: "combobox", icon: { name: "angle-down" }, onChanged: (value) => this.handleTitleAlignmentChange(value) })),
+                    this.$render("i-panel", { class: "listDivider" }),
+                    this.$render("i-hstack", { width: "100%", verticalAlignment: 'center' },
+                        this.$render("i-label", { caption: "Font size", width: "30%" }),
+                        this.$render("i-input", { id: "titleFontSizeInput", class: "shortInput", width: "70%", value: parseInt(this.tempData.title.titleFontsize.replace("px", "")), inputType: "number", onChanged: (value) => this.handleTitleFontSizeChange(value) })),
+                    this.$render("i-panel", { class: "listDivider" }),
+                    this.$render("i-hstack", { width: "100%", verticalAlignment: 'center' },
+                        this.$render("i-label", { caption: "Caption", width: "30%" }),
+                        this.$render("i-input", { id: 'titleInput', width: "70%", inputType: "textarea", placeholder: "Input the title here", value: this.tempData.title.titleContent, class: "caption", height: "150px", onChanged: (value) => this.handleTitleCaptionChange(value) })))));
         }
         render() {
             return this.$render("i-panel", { id: "mainPnl", width: "100%" },
                 this.$render("i-hstack", { width: "100%" },
-                    this.$render("i-panel", { id: "editPage", width: "40%", padding: { left: '2rem', top: '2rem', right: '2rem', bottom: '2rem' }, border: { right: { width: '1px', style: "solid", color: "gray" } } },
-                        this.$render("i-hstack", { width: "100%", horizontalAlignment: 'center', margin: { bottom: '1.5rem' } },
-                            this.$render("i-label", { caption: "Title Setting", class: "settingTxt" })),
-                        this.$render("i-vstack", { id: "titleSetting", width: "100%", background: { color: '#ffe6d5' }, margin: { top: '10px' }, padding: { top: '1rem', bottom: "1rem", left: "1rem", right: "1rem" }, border: { radius: '10px' } }),
-                        this.$render("i-vstack", { id: "contentSetting", width: "100%" },
-                            this.$render("i-hstack", { width: "100%", horizontalAlignment: 'center' },
-                                this.$render("i-label", { caption: "Content Setting", class: "settingTxt", margin: { top: "2rem", bottom: '1.5rem' } })),
+                    this.$render("i-panel", { id: "editPage", background: { color: "#f3f3f4" }, width: "50%", class: "scrollable", border: { right: { width: '1px', style: "solid", color: "grey" } } },
+                        this.$render("i-vstack", { id: "titleSetting", width: "100%", padding: { top: 15, left: 15, right: 15, bottom: 15 } }),
+                        this.$render("i-vstack", { id: "contentSetting", width: "100%", padding: { top: 15, left: 15, right: 15, bottom: 15 } },
                             this.$render("i-panel", { id: "content", width: "100%" }),
                             this.$render("i-label", { id: "noContent", caption: "No content", margin: { bottom: '1rem' } }),
                             this.$render("i-hstack", { width: "100%", justifyContent: 'center', gap: "20px" },
-                                this.$render("i-button", { caption: "Add a paragragh", padding: { left: '10px', top: '5px', right: '10px', bottom: '5px' }, onClick: this.addParagraph }),
-                                this.$render("i-button", { caption: "Add button", padding: { left: '10px', top: '5px', right: '10px', bottom: '5px' }, onClick: this.addButtons })))),
-                    this.$render("i-panel", { id: "viewPage", width: "60%", padding: { left: '2rem', top: '2rem', right: '2rem', bottom: '2rem' } },
+                                this.$render("i-button", { caption: "Add a paragragh", padding: { left: '10px', top: '5px', right: '10px', bottom: '5px' }, onClick: this.addParagraph, font: { color: "#000000" } }),
+                                this.$render("i-button", { caption: "Add button", padding: { left: '10px', top: '5px', right: '10px', bottom: '5px' }, onClick: this.addButtons, font: { color: "#000000" } })))),
+                    this.$render("i-panel", { id: "viewPage", width: "50%", padding: { left: '2rem', top: '2rem', right: '2rem', bottom: '2rem' } },
                         this.$render("i-hstack", { width: "100%", horizontalAlignment: 'center' },
                             this.$render("i-label", { id: "previewTxt", caption: "Preview", class: "settingTxt" })),
                         this.$render("i-vstack", { id: "preview", width: "100%" }))));
