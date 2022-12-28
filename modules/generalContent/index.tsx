@@ -22,7 +22,8 @@ interface GeneralContentData {
         titleFontColor: string,
         titleAlignment: string,
         titleBold: boolean,
-        titleDivider: boolean
+        titleDivider: boolean,
+        // titleFontFamily: string
     },
     contentList: ContentData[]
 }
@@ -169,8 +170,8 @@ export default class GeneralContent extends Module implements PageBlock {
         if (sceneName == "editor") {
             this.editPage.visible = true;
             this.viewPage.visible = true;
-            this.editPage.width = "40%";
-            this.viewPage.width = "60%";
+            this.editPage.width = "50%";
+            this.viewPage.width = "50%";
             this.previewTxt.visible = true
 
         } else if (sceneName == "viewer") {
@@ -325,6 +326,7 @@ export default class GeneralContent extends Module implements PageBlock {
 
         this.setNoContent();
         this.renderPreview();
+        this.renderConfig();
     }
 
     private addParagraph() {
@@ -373,112 +375,157 @@ export default class GeneralContent extends Module implements PageBlock {
         this.content.clearInnerHTML();
         this.setNoContent();
 
+        let txtContent = 0, btnContent = 0;
+
         for (let i = 0; i < this.tempData.contentList.length; i++) {
 
             if (this.tempData.contentList[i].type == "paragraph") {
+                txtContent++;
                 let contentId = this.tempData.contentList[i].contentId
                 this.content.append(
-                    <i-vstack id={`vstack_${contentId}`} class="configVstack" width="100%" background={{ color: '#ffe6d5' }}
-                        margin={{ bottom: '10px' }} border={{ radius: '10px' }}
-                        padding={{ top: '1rem', bottom: "1rem", left: "1rem", right: "1rem" }} gap="10px">
-                        <i-hstack width="100%" justifyContent='space-between' verticalAlignment='center'>
-                            <i-hstack gap={"10px"}>
-                                <i-label caption="Color"></i-label>
-                                <i-input id={`Pcolor_${contentId}`} inputType='color' value={(this.tempData.contentList[i].content as ParagraphData).paraFontColor}
-                                    onChanged={(value) => this.handleContentColorChange(value, "p")}></i-input>
-                            </i-hstack>
-                            <i-icon id={`removeBtn_${contentId}`} name='times-circle' fill='black'
-                                width="25px" height="25px" class="pointer"
+                    <i-vstack id={`vstack_${contentId}`} width="100%"
+                        background={{ color: '#ffffff' }} margin={{ bottom: "20px" }}>
+
+                        <i-hstack width="100%" verticalAlignment='center'
+                            margin={{ top: 20, bottom: 20 }} padding={{ left: 15, right: 15 }}
+                            justifyContent="space-between">
+                            <i-label caption={`Text Content ${txtContent}`}
+                                font={{ size: '14px', bold: true }}></i-label>
+
+                            <i-icon id={`removeBtn_${contentId}`} name='times' fill='black'
+                                width="20px" height="20px" class="pointer"
                                 onClick={(value) => this.removeAContent(value)}></i-icon>
                         </i-hstack>
-                        <i-hstack width={"100%"} gap={"10px"}>
-                            <i-hstack width={"50%"} gap={"10px"}>
-                                <i-label caption="Alignment"></i-label>
-                                <i-input id={`Palign_${contentId}`}
-                                    items={this.alignmentChoices} inputType="combobox"
+
+                        <i-panel class="titleDivider"></i-panel>
+
+                        <i-vstack width="100%" padding={{ left: 15, right: 15, bottom: 15 }}>
+
+                            <i-hstack width={"100%"} verticalAlignment='center'>
+                                <i-label caption="Color" width="30%" ></i-label>
+                                <i-input id={`Pcolor_${contentId}`} width="70%" inputType='color' value={(this.tempData.contentList[i].content as ParagraphData).paraFontColor}
+                                    onChanged={(value) => this.handleContentColorChange(value, "p")}></i-input>
+                            </i-hstack>
+
+                            <i-panel class="listDivider"></i-panel>
+
+                            <i-hstack width={"100%"} verticalAlignment='center'>
+                                <i-label caption="Alignment" width="30%" ></i-label>
+                                <i-input id={`Palign_${contentId}`} width="70%"
+                                    items={this.alignmentChoices} inputType="combobox" icon={{ name: "angle-down" }}
                                     selectedItem={this.getAlignmentChoicesByLabel(((this.tempData.contentList[i].content) as ParagraphData).paraAlignment, 0)}
                                     onChanged={(value) => this.handleContentAlignmentChange(value, "p")}></i-input>
                             </i-hstack>
-                            <i-hstack width={"50%"} gap={"10px"}>
-                                <i-label caption="Font size"></i-label>
-                                <i-input id={`PfontSize_${contentId}`} inputType="number" width="70px" border={{ radius: '10px' }}
+
+                            <i-panel class="listDivider"></i-panel>
+
+                            <i-hstack width={"100%"} verticalAlignment='center'>
+                                <i-label caption="Font size" width="30%" ></i-label>
+                                <i-input id={`PfontSize_${contentId}`} inputType="number" width="70%" class="shortInput"
                                     value={parseInt((this.tempData.contentList[i].content as ParagraphData).paraFontsize.replace("px", ""))}
                                     onChanged={(value) => this.handleContentFontSizeChange(value, "p")}></i-input>
                             </i-hstack>
-                        </i-hstack>
 
-                        <i-label caption="Caption"></i-label>
-                        <i-input id={`Pcaption_${contentId}`} inputType="textarea" placeholder="Input the title here"
-                            width={'100%'} height={"150px"} value={(this.tempData.contentList[i].content as ParagraphData).paraContent}
-                            onChanged={(value) => this.handleContentCaptionChange(value, "p")} ></i-input>
+                            <i-panel class="listDivider"></i-panel>
+
+                            <i-hstack width={"100%"} verticalAlignment='center'>
+                                <i-label caption="Caption" width="30%"></i-label>
+                                <i-input id={`Pcaption_${contentId}`} inputType="textarea" placeholder="Input the title here" class="caption"
+                                    width={'70%'} height={"150px"} value={(this.tempData.contentList[i].content as ParagraphData).paraContent}
+                                    onChanged={(value) => this.handleContentCaptionChange(value, "p")} ></i-input>
+                            </i-hstack>
+                        </i-vstack>
                     </i-vstack>
                 )
 
             } else if (this.tempData.contentList[i].type == "button") {
-
+                btnContent++;
                 let contentId = this.tempData.contentList[i].contentId
                 this.content.append(
-                    <i-vstack id={`vstack_${contentId}`} class="configVstack" width="100%" background={{ color: '#ffe6d5' }}
-                        margin={{ bottom: '10px' }} border={{ radius: '10px' }}
-                        padding={{ top: '1rem', bottom: "1rem", left: "1rem", right: "1rem" }} gap="10px">
-                        <i-hstack width="100%" justifyContent='space-between' verticalAlignment='center'>
-                            <i-hstack gap={"10px"}>
-                                <i-label caption="Text color"></i-label>
-                                <i-input id={`Bcolor_${contentId}`} inputType='color'
+                    <i-vstack id={`vstack_${contentId}`} width="100%"
+                        background={{ color: '#ffffff' }} margin={{ bottom: "20px" }}>
+
+                        <i-hstack width="100%" verticalAlignment='center'
+                            margin={{ top: 20, bottom: 20 }} padding={{ left: 15, right: 15 }}
+                            justifyContent="space-between">
+                            <i-label caption={`Button Content ${btnContent}`}
+                                font={{ size: '14px', bold: true }}></i-label>
+
+                            <i-icon id={`removeBtn_${contentId}`} name='times' fill='black'
+                                width="20px" height="20px" class="pointer"
+                                onClick={(value) => this.removeAContent(value)}></i-icon>
+                        </i-hstack>
+
+                        <i-panel class="titleDivider"></i-panel>
+
+                        <i-vstack width="100%" padding={{ left: 15, right: 15, bottom: 15 }}>
+
+                            <i-hstack width={"100%"} verticalAlignment='center'>
+                                <i-label caption="Text color" width="30%" ></i-label>
+                                <i-input id={`Bcolor_${contentId}`} inputType='color' width="70%"
                                     value={(this.tempData.contentList[i].content as ButtonData).btnTxtColor}
                                     onChanged={(value) => this.handleContentColorChange(value, "b")}></i-input>
                             </i-hstack>
 
-                            <i-icon id={`removeBtn_${contentId}`} name='times-circle' fill='black'
-                                width="25px" height="25px" class="pointer"
-                                onClick={(value) => this.removeAContent(value)}></i-icon>
-                        </i-hstack>
-                        <i-hstack width={"100%"} gap={"10px"}>
-                            <i-label caption="Background color"></i-label>
-                            <i-input id={`BBGcolor_${contentId}`} inputType='color'
-                                value={(this.tempData.contentList[i].content as ButtonData).btnBGColor}
-                                onChanged={(value) => this.handleButtonColorChange(value)}></i-input>
-                        </i-hstack>
+                            <i-panel class="listDivider"></i-panel>
 
-                        <i-hstack width={"100%"} gap={"10px"}>
-                            <i-hstack width={"50%"} gap={"10px"}>
-                                <i-label caption="Alignment"></i-label>
-                                <i-input id={`BAlignment_${contentId}`} items={this.alignmentChoices} inputType="combobox"
+                            <i-hstack width={"100%"} verticalAlignment='center'>
+                                <i-label caption="Background color" width="30%"></i-label>
+                                <i-input id={`BBGcolor_${contentId}`} inputType='color' width="70%"
+                                    value={(this.tempData.contentList[i].content as ButtonData).btnBGColor}
+                                    onChanged={(value) => this.handleButtonColorChange(value)}></i-input>
+                            </i-hstack>
+
+                            <i-panel class="listDivider"></i-panel>
+
+                            <i-hstack width={"100%"} verticalAlignment='center'>
+                                <i-label caption="Alignment" width="30%"></i-label>
+                                <i-input id={`BAlignment_${contentId}`} items={this.alignmentChoices} inputType="combobox" icon={{ name: "angle-down" }}
                                     selectedItem={this.getAlignmentChoicesByLabel(((this.tempData.contentList[i].content) as ButtonData).btnAlignment, 2)}
+                                    width="70%"
                                     onChanged={(value) => this.handleContentAlignmentChange(value, "b")} ></i-input>
                             </i-hstack>
 
-                            <i-hstack width={"50%"} gap={"10px"}>
-                                <i-label caption="Font size"></i-label>
-                                <i-input id={`BFontSize_${contentId}`} inputType="number" width="70px" border={{ radius: '10px' }}
+                            <i-panel class="listDivider"></i-panel>
+
+                            <i-hstack width={"100%"} verticalAlignment='center'>
+                                <i-label caption="Font size" width="30%"></i-label>
+                                <i-input id={`BFontSize_${contentId}`} inputType="number" width="70%" class="shortInput"
                                     value={parseInt((this.tempData.contentList[i].content as ButtonData).btnTxtFontSize.replace("px", ""))}
                                     onChanged={(value) => this.handleContentFontSizeChange(value, "b")}></i-input>
                             </i-hstack>
-                        </i-hstack>
 
+                            <i-panel class="listDivider"></i-panel>
 
-                        <i-hstack width="100%" gap="5px" verticalAlignment='center'>
-                            <i-label caption="Caption"></i-label>
-                            <i-input id={`BCaption_${contentId}`} inputType="textarea" margin={{ left: '1rem' }}
-                                placeholder="Input the title here" width={'100%'} height={"30px"}
-                                value={(this.tempData.contentList[i].content as ButtonData).btnTxt}
-                                onChanged={(value) => this.handleContentCaptionChange(value, "b")} ></i-input>
-                        </i-hstack>
+                            <i-hstack width={"100%"} verticalAlignment='center'>
+                                <i-label caption="Caption" width="30%"></i-label>
+                                <i-input id={`BCaption_${contentId}`} inputType="textarea"
+                                    placeholder="Input the title here" width={'70%'} class="shortInput"
+                                    value={(this.tempData.contentList[i].content as ButtonData).btnTxt}
+                                    onChanged={(value) => this.handleContentCaptionChange(value, "b")} ></i-input>
+                            </i-hstack>
 
-                        <i-hstack width="100%" gap="5px" verticalAlignment='center'>
-                            <i-label caption="Link"></i-label>
-                            <i-input id={`BLink_${contentId}`} inputType="textarea" margin={{ left: '1rem' }}
-                                placeholder="Input the link here" width={'100%'} height={"30px"}
-                                value={(this.tempData.contentList[i].content as ButtonData).btnLink}
-                                onChanged={(value) => this.handleButtonLinkChange(value)} ></i-input>
-                        </i-hstack>
+                            <i-panel class="listDivider"></i-panel>
 
+                            <i-hstack width={"100%"} verticalAlignment='center'>
+                                <i-label caption="Link" width="30%"></i-label>
+                                <i-input id={`BLink_${contentId}`} inputType="textarea"
+                                    placeholder="Input the link here" width={'70%'} class="shortInput"
+                                    value={(this.tempData.contentList[i].content as ButtonData).btnLink}
+                                    onChanged={(value) => this.handleButtonLinkChange(value)} ></i-input>
+                            </i-hstack>
+                        </i-vstack>
                     </i-vstack>
                 )
 
             } else {
                 console.log("Content type does not exist")
             }
+
+            // adjust config page height
+            // console.log(this.editPage.style.height, this.viewPage.style.height);
+            // this.editPage.style.height = this.viewPage.style.height;
+            // console.log(this.editPage.style.height, this.viewPage.style.height);
         }
     }
 
@@ -493,6 +540,7 @@ export default class GeneralContent extends Module implements PageBlock {
         text.style.color = this.tempData.title.titleFontColor
         text.style.fontWeight = (this.tempData.title.titleBold) ? "bold" : "normal";
         text.style.marginBottom = "0.5rem";
+        text.style.fontFamily = "";
 
         this.preview.append(text)
 
@@ -528,6 +576,11 @@ export default class GeneralContent extends Module implements PageBlock {
                 console.log("Content type does not exist")
             }
         }
+
+        // adjust config page height
+        // console.log(this.editPage.style.height, this.viewPage.style.height);
+        // this.editPage.style.height = this.viewPage.style.height;
+        // console.log(this.editPage.style.height, this.viewPage.style.height);
     }
 
     private getAlignmentChoicesByLabel(alignType: string, defaultIndex: number) {
@@ -560,42 +613,66 @@ export default class GeneralContent extends Module implements PageBlock {
 
     private initTitleSetting() {
         this.titleSetting.append(
-            <i-vstack width={"100%"} gap="10px">
+            <i-vstack width={"100%"} background={{ color: '#ffffff' }}>
 
-                <i-hstack width={"100%"} gap={"10px"} verticalAlignment={"center"} justifyContent="space-between">
-                    <i-hstack gap={"10px"}>
-                        <i-label caption="Color"></i-label>
-                        <i-input id="titleColorPicker" value={this.tempData.title.titleFontColor} inputType='color'
+                <i-hstack width="100%" verticalAlignment='center'
+                    margin={{ top: 20, bottom: 20 }} padding={{ left: 15, right: 15 }}>
+                    <i-label caption="Title Setting" font={{ size: '14px', bold: true }}></i-label>
+                </i-hstack>
+
+                <i-panel class="titleDivider"></i-panel>
+
+                <i-vstack width="100%" padding={{ left: 15, right: 15, bottom: 15 }}>
+
+                    <i-hstack width={"100%"} verticalAlignment='center'>
+                        <i-label caption="Color" width="30%" ></i-label>
+                        <i-input id="titleColorPicker" width="70%" value={this.tempData.title.titleFontColor} inputType='color'
                             onChanged={(value) => this.handleTitleColorChange(value)}></i-input>
                     </i-hstack>
 
-                    <i-input id="titleBoldInput" inputType='checkbox' checked={true} caption="Bold"
-                        onChanged={(value) => this.handleTitleBoldChange(value)}></i-input>
+                    <i-panel class="listDivider"></i-panel>
 
-                    <i-input id="titleDividerInput" inputType='checkbox' checked={true} caption={"Divider"}
-                        onChanged={(value) => this.handleTitleDividerChange(value)}></i-input>
+                    <i-hstack width={"100%"} verticalAlignment='center'>
+                        <i-label caption="Style" width="30%" ></i-label>
+                        <i-vstack width="70%" horizontalAlignment='start' gap="10px">
+                            <i-input id="titleBoldInput" inputType='checkbox' checked={true} caption="Bold"
+                                onChanged={(value) => this.handleTitleBoldChange(value)}></i-input>
 
-                </i-hstack>
+                            <i-input id="titleDividerInput" inputType='checkbox' checked={true} caption="Divider"
+                                onChanged={(value) => this.handleTitleDividerChange(value)}></i-input>
+                        </i-vstack>
+                    </i-hstack>
 
-                <i-hstack width={"100%"} gap={"10px"}>
-                    <i-hstack width={"50%"} gap={"10px"}>
-                        <i-label caption="Alignment"></i-label>
-                        <i-input id="titleAlignmentPicker" selectedItem={this.getAlignmentChoicesByLabel(this.tempData.title.titleAlignment, 2)}
-                            items={this.alignmentChoices} inputType="combobox" border={{ radius: '10px' }}
+                    <i-panel class="listDivider"></i-panel>
+
+                    <i-hstack width={"100%"} verticalAlignment='center'>
+                        <i-label caption="Alignment" width="30%"></i-label>
+                        <i-input id="titleAlignmentPicker" width="70%" selectedItem={this.getAlignmentChoicesByLabel(this.tempData.title.titleAlignment, 2)}
+                            captionWidth={0} caption=""
+                            items={this.alignmentChoices} inputType="combobox" icon={{ name: "angle-down" }}
                             onChanged={(value) => this.handleTitleAlignmentChange(value)}></i-input>
                     </i-hstack>
-                    <i-hstack width={"50%"} gap={"10px"}>
-                        <i-label caption="Font size"></i-label>
-                        <i-input id="titleFontSizeInput" value={parseInt(this.tempData.title.titleFontsize.replace("px", ""))} inputType="number"
-                            border={{ radius: '10px' }} width="70px"
+
+                    <i-panel class="listDivider"></i-panel>
+
+                    <i-hstack width={"100%"} verticalAlignment='center'>
+                        <i-label caption="Font size" width="30%"></i-label>
+                        <i-input id="titleFontSizeInput" class="shortInput" width="70%" value={parseInt(this.tempData.title.titleFontsize.replace("px", ""))}
+                            inputType="number"
                             onChanged={(value) => this.handleTitleFontSizeChange(value)}></i-input>
                     </i-hstack>
-                </i-hstack>
 
-                <i-label caption="Caption"></i-label>
-                <i-input id='titleInput' inputType="textarea" placeholder="Input the title here"
-                    value={this.tempData.title.titleContent} border={{ radius: '10px' }}
-                    width={'100%'} height={"150px"} onChanged={(value) => this.handleTitleCaptionChange(value)} ></i-input>
+                    <i-panel class="listDivider"></i-panel>
+
+                    <i-hstack width={"100%"} verticalAlignment='center'>
+                        <i-label caption="Caption" width="30%"></i-label>
+                        <i-input id='titleInput' width="70%" inputType="textarea" placeholder="Input the title here"
+                            value={this.tempData.title.titleContent} class="caption"
+                            height={"150px"} onChanged={(value) => this.handleTitleCaptionChange(value)} ></i-input>
+                    </i-hstack>
+
+                </i-vstack>
+
             </i-vstack>
         )
     }
@@ -604,40 +681,35 @@ export default class GeneralContent extends Module implements PageBlock {
         return <i-panel id="mainPnl" width="100%">
 
             <i-hstack width="100%">
-                <i-panel id="editPage" width="40%" padding={{ left: '2rem', top: '2rem', right: '2rem', bottom: '2rem' }}
-                    border={{ right: { width: '1px', style: "solid", color: "gray" } }}>
 
-                    <i-hstack width="100%" horizontalAlignment='center' margin={{ bottom: '1.5rem' }}>
-                        <i-label caption="Title Setting" class="settingTxt"></i-label>
-                    </i-hstack>
+                <i-panel id="editPage" background={{ color: "#f3f3f4" }} width="50%" class="scrollable"
+                    border={{ right: { width: '1px', style: "solid", color: "grey" } }}>
 
-                    <i-vstack id="titleSetting" width="100%" background={{ color: '#ffe6d5' }} margin={{ top: '10px' }}
-                        padding={{ top: '1rem', bottom: "1rem", left: "1rem", right: "1rem" }} border={{ radius: '10px' }}>
+                    <i-vstack id="titleSetting" width="100%" padding={{ top: 15, left: 15, right: 15, bottom: 15 }} />
 
-                    </i-vstack>
+                    <i-vstack id="contentSetting" width="100%" padding={{ top: 15, left: 15, right: 15, bottom: 15 }}>
 
-                    <i-vstack id="contentSetting" width="100%">
-                        <i-hstack width="100%" horizontalAlignment='center'>
-                            <i-label caption="Content Setting" class="settingTxt" margin={{ top: "2rem", bottom: '1.5rem' }}></i-label>
-                        </i-hstack>
                         <i-panel id="content" width="100%"></i-panel>
                         <i-label id="noContent" caption="No content" margin={{ bottom: '1rem' }}></i-label>
+
                         <i-hstack width="100%" justifyContent='center' gap="20px">
                             <i-button caption="Add a paragragh" padding={{ left: '10px', top: '5px', right: '10px', bottom: '5px' }}
-                                onClick={this.addParagraph}></i-button>
+                                onClick={this.addParagraph} font={{ color: "#000000" }}></i-button>
                             <i-button caption="Add button" padding={{ left: '10px', top: '5px', right: '10px', bottom: '5px' }}
-                                onClick={this.addButtons}></i-button>
+                                onClick={this.addButtons} font={{ color: "#000000" }}></i-button>
                         </i-hstack>
+
                     </i-vstack>
 
                 </i-panel>
 
-                <i-panel id="viewPage" width="60%" padding={{ left: '2rem', top: '2rem', right: '2rem', bottom: '2rem' }}>
+                <i-panel id="viewPage" width="50%" padding={{ left: '2rem', top: '2rem', right: '2rem', bottom: '2rem' }}>
                     <i-hstack width="100%" horizontalAlignment='center'>
                         <i-label id={"previewTxt"} caption="Preview" class="settingTxt"></i-label>
                     </i-hstack>
                     <i-vstack id="preview" width="100%" />
                 </i-panel>
+
             </i-hstack>
 
         </i-panel>
